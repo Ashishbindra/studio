@@ -52,10 +52,19 @@ export const uiContent = {
 
   // Payments Page
   'payments.title': 'Payment Overview',
+  'payments.record.payment': 'Record Payment',
   'payments.table.worker': 'Worker',
   'payments.table.status': 'Status',
   'payments.status.paid': 'Paid',
   'payments.status.due': 'Due',
+
+  // Add Payment Dialog
+  'dialog.record.payment.title': 'Record a Payment',
+  'dialog.record.payment.description': "Select a worker and enter the amount paid.",
+  'form.worker.label': 'Worker',
+  'form.worker.placeholder': 'Select a worker',
+  'form.payment.amount.label': 'Amount (₹)',
+  'form.payment.amount.placeholder': 'e.g. 1000',
 };
 
 export type UIContentKeys = keyof typeof uiContent;

@@ -1,0 +1,96 @@
+
+'use client';
+import { useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { Worker, Payment } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+interface AddPaymentDialogProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  onSavePayment: (payment: Omit<Payment, 'id' | 'date'>) => void;
+  workers: Worker[];
+}
+
+const paymentSchema = z.object({
+  workerId: z.string().min(1, { message: 'Please select a worker.' }),
+  amount: z.coerce.number().positive({ message: 'Payment amount must be a positive number.' }),
+});
+
+type PaymentFormData = z.infer<typeof paymentSchema>;
+
+export default function AddPaymentDialog({ isOpen, onOpenChange, onSavePayment, workers }: AddPaymentDialogProps) {
+  const { t } = useLanguage();
+  
+  const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentSchema),
+  });
+
+  const workerId = watch("workerId");
+
+  useEffect(() => {
+    if (!isOpen) {
+      reset({ workerId: '', amount: 0 });
+    }
+  }, [isOpen, reset]);
+
+  const onSubmit = (data: PaymentFormData) => {
+    onSavePayment(data);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="font-headline">{t('dialog.record.payment.title')}</DialogTitle>
+          <DialogDescription>{t('dialog.record.payment.description')}</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="workerId" className="text-right">{t('form.worker.label')}</Label>
+              <div className="col-span-3">
+                <Select onValueChange={(value) => setValue('workerId', value)} value={workerId}>
+                    <SelectTrigger id="workerId">
+                        <SelectValue placeholder={t('form.worker.placeholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {workers.map(worker => (
+                            <SelectItem key={worker.id} value={worker.id}>{worker.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                {errors.workerId && <p className="text-red-500 text-xs mt-1">{errors.workerId.message}</p>}
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="amount" className="text-right">{t('form.payment.amount.label')}</Label>
+              <div className="col-span-3">
+                <Input id="amount" type="number" {...register('amount')} placeholder={t('form.payment.amount.placeholder')} />
+                {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount.message}</p>}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('form.cancel')}</Button>
+            <Button type="submit">{t('form.save')}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
