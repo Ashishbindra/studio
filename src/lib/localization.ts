@@ -9,6 +9,8 @@ export const uiContent = {
   // Dashboard Page
   'dashboard.title': 'Worker Dashboard',
   'dashboard.add.worker': 'Add Worker',
+  'dashboard.edit.worker': 'Edit',
+  'dashboard.delete.worker': 'Delete',
   'worker.wage.per.day': '/ day',
   'worker.due': 'Due',
   'worker.paid': 'Paid',

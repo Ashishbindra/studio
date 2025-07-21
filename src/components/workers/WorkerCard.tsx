@@ -5,7 +5,8 @@ import { Separator } from '@/components/ui/separator';
 import type { Worker, Attendance, Payment } from '@/lib/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { Phone, Wallet } from 'lucide-react';
+import { Phone, Wallet, Pencil, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface WorkerCardProps {
   worker: Worker;
@@ -68,6 +69,16 @@ export default function WorkerCard({ worker, attendances, payments }: WorkerCard
           </div>
         </div>
       </CardContent>
+      <CardFooter className="p-4 pt-0 flex justify-end gap-2">
+        <Button variant="outline" size="sm">
+          <Pencil className="mr-2 h-4 w-4" />
+          {t('dashboard.edit.worker')}
+        </Button>
+        <Button variant="destructive" size="sm">
+          <Trash2 className="mr-2 h-4 w-4" />
+          {t('dashboard.delete.worker')}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
