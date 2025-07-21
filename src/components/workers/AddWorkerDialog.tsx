@@ -1,0 +1,99 @@
+'use client';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
+import type { Worker } from '@/lib/types';
+
+interface AddWorkerDialogProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  onAddWorker: (worker: Omit<Worker, 'id' | 'photoUrl'> & { photoUrl?: string }) => void;
+}
+
+const workerSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  phoneNumber: z.string().regex(/^\d{10}$/, { message: 'Phone number must be 10 digits.' }),
+  dailyWage: z.coerce.number().positive({ message: 'Daily wage must be a positive number.' }),
+  photoUrl: z.string().url().optional().or(z.literal('')),
+});
+
+type WorkerFormData = z.infer<typeof workerSchema>;
+
+export default function AddWorkerDialog({ isOpen, onOpenChange, onAddWorker }: AddWorkerDialogProps) {
+  const { t } = useLanguage();
+  const { toast } = useToast();
+  
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<WorkerFormData>({
+    resolver: zodResolver(workerSchema),
+  });
+
+  const onSubmit = (data: WorkerFormData) => {
+    onAddWorker(data);
+    toast({
+        title: "Worker Added",
+        description: `${data.name} has been successfully added.`,
+    })
+    reset();
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="font-headline">{t('dialog.add.worker.title')}</DialogTitle>
+          <DialogDescription>{t('dialog.add.worker.description')}</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">{t('form.name.label')}</Label>
+              <div className="col-span-3">
+                <Input id="name" {...register('name')} placeholder={t('form.name.placeholder')} />
+                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="phoneNumber" className="text-right">{t('form.phone.label')}</Label>
+              <div className="col-span-3">
+                <Input id="phoneNumber" {...register('phoneNumber')} placeholder={t('form.phone.placeholder')} />
+                {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber.message}</p>}
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="dailyWage" className="text-right">{t('form.daily.wage.label')}</Label>
+              <div className="col-span-3">
+                <Input id="dailyWage" type="number" {...register('dailyWage')} placeholder={t('form.daily.wage.placeholder')} />
+                {errors.dailyWage && <p className="text-red-500 text-xs mt-1">{errors.dailyWage.message}</p>}
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="photoUrl" className="text-right">{t('form.photo.url.label')}</Label>
+              <div className="col-span-3">
+                <Input id="photoUrl" {...register('photoUrl')} placeholder={t('form.photo.url.placeholder')} />
+                {errors.photoUrl && <p className="text-red-500 text-xs mt-1">{errors.photoUrl.message}</p>}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('form.cancel')}</Button>
+            <Button type="submit">{t('form.save')}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
