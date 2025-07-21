@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import PaymentList from '@/components/payments/PaymentList';
-import { workers as initialWorkers, attendances as initialAttendances, payments as initialPayments } from '@/lib/data';
+import { workers as initialWorkers } from '@/lib/data';
 import type { Worker, Attendance, Payment } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -14,8 +14,8 @@ export default function PaymentsPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [workers] = useState<Worker[]>(initialWorkers);
-  const [attendances] = useState<Attendance[]>(initialAttendances);
-  const [payments, setPayments] = useState<Payment[]>(initialPayments);
+  const [attendances, setAttendances] = useState<Attendance[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
 
   const handleAddPayment = (paymentData: Omit<Payment, 'id' | 'date'>) => {
@@ -27,8 +27,8 @@ export default function PaymentsPage() {
     setPayments(prev => [...prev, newPayment]);
     const worker = workers.find(w => w.id === newPayment.workerId);
     toast({
-        title: "Payment Recorded",
-        description: `₹${newPayment.amount} paid to ${worker?.name || 'worker'}.`,
+        title: t('toast.payment.recorded.title'),
+        description: t('toast.payment.recorded.description').replace('{amount}', newPayment.amount.toString()).replace('{workerName}', worker?.name || 'worker'),
     });
     setIsPaymentDialogOpen(false);
   };

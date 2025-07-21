@@ -65,6 +65,22 @@ export const uiContent = {
   'form.worker.placeholder': 'Select a worker',
   'form.payment.amount.label': 'Amount (₹)',
   'form.payment.amount.placeholder': 'e.g. 1000',
+
+  // Toasts
+  'toast.worker.added.title': 'Worker Added',
+  'toast.worker.added.description': '{workerName} has been successfully added.',
+  'toast.worker.updated.title': 'Worker Updated',
+  'toast.worker.updated.description': "{workerName}'s details have been updated.",
+  'toast.worker.deleted.title': 'Worker Deleted',
+  'toast.worker.deleted.description': '{workerName} has been removed.',
+  'toast.attendance.marked.present.title': 'Marked Present',
+  'toast.attendance.marked.present.description': '{workerName} marked as present.',
+  'toast.attendance.marked.absent.title': 'Marked Absent',
+  'toast.attendance.marked.absent.description': '{workerName} marked as absent.',
+  'toast.attendance.checked.out.title': 'Checked Out',
+  'toast.attendance.checked.out.description': '{workerName} has been checked out.',
+  'toast.payment.recorded.title': 'Payment Recorded',
+  'toast.payment.recorded.description': '₹{amount} paid to {workerName}.',
 };
 
 export type UIContentKeys = keyof typeof uiContent;
