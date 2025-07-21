@@ -66,5 +66,5 @@ export const payments: Payment[] = [
   { id: 'p2', workerId: 'w2', date: '2023-10-05', amount: 2200 },
 
   // Rajesh's payments
-  { id: 'p3', workerId: 'w3', date: '2023-10-05', amount: 3500 },
+  { id: 'p3', workerId: 'w3', date: '2023-10-05', amount: 300 },
 ];
