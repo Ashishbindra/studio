@@ -12,10 +12,11 @@ interface WorkerCardProps {
   worker: Worker;
   attendances: Attendance[];
   payments: Payment[];
+  onEdit: (worker: Worker) => void;
   onDelete: (worker: Worker) => void;
 }
 
-export default function WorkerCard({ worker, attendances, payments, onDelete }: WorkerCardProps) {
+export default function WorkerCard({ worker, attendances, payments, onEdit, onDelete }: WorkerCardProps) {
   const { t } = useLanguage();
 
   const presentDays = attendances.filter(a => a.status === 'present').length;
@@ -71,7 +72,7 @@ export default function WorkerCard({ worker, attendances, payments, onDelete }: 
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-end gap-2">
-        <Button variant="outline" size="sm" disabled>
+        <Button variant="outline" size="sm" onClick={() => onEdit(worker)}>
           <Pencil className="mr-2 h-4 w-4" />
           {t('dashboard.edit.worker')}
         </Button>

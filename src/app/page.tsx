@@ -13,17 +13,47 @@ import { useToast } from '@/hooks/use-toast';
 export default function DashboardPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const [isAddWorkerOpen, setIsAddWorkerOpen] = useState(false);
+  const [isWorkerDialogOpen, setIsWorkerDialogOpen] = useState(false);
   const [workers, setWorkers] = useState<Worker[]>(initialWorkers);
   const [workerToDelete, setWorkerToDelete] = useState<Worker | null>(null);
+  const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
 
-  const handleAddWorker = (newWorker: Omit<Worker, 'id' | 'photoUrl'>) => {
-    const worker: Worker = {
-      ...newWorker,
-      id: `w${workers.length + 1}`,
-      photoUrl: newWorker.photoUrl || `https://placehold.co/100x100.png`
-    };
-    setWorkers(prev => [...prev, worker]);
+  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id' | 'photoUrl'> & { photoUrl?: string }) => {
+    if (workerToEdit) {
+      // Editing existing worker
+      const updatedWorkers = workers.map(w =>
+        w.id === workerToEdit.id ? { ...w, ...workerData, photoUrl: workerData.photoUrl || w.photoUrl } : w
+      );
+      setWorkers(updatedWorkers);
+      toast({
+        title: "Worker Updated",
+        description: `${workerData.name}'s details have been updated.`,
+      });
+    } else {
+      // Adding new worker
+      const newWorker: Worker = {
+        ...workerData,
+        id: `w${workers.length + 1}`,
+        photoUrl: workerData.photoUrl || `https://placehold.co/100x100.png`
+      };
+      setWorkers(prev => [...prev, newWorker]);
+      toast({
+          title: "Worker Added",
+          description: `${newWorker.name} has been successfully added.`,
+      });
+    }
+    setWorkerToEdit(null);
+    setIsWorkerDialogOpen(false);
+  };
+  
+  const handleOpenAddDialog = () => {
+    setWorkerToEdit(null);
+    setIsWorkerDialogOpen(true);
+  };
+
+  const handleOpenEditDialog = (worker: Worker) => {
+    setWorkerToEdit(worker);
+    setIsWorkerDialogOpen(true);
   };
 
   const handleDeleteRequest = (worker: Worker) => {
@@ -47,18 +77,19 @@ export default function DashboardPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold font-headline">{t('dashboard.title')}</h1>
-        <Button onClick={() => setIsAddWorkerOpen(true)}>
+        <Button onClick={handleOpenAddDialog}>
           <PlusCircle className="mr-2 h-5 w-5" />
           {t('dashboard.add.worker')}
         </Button>
       </div>
 
-      <WorkerList workers={workers} onDelete={handleDeleteRequest} />
+      <WorkerList workers={workers} onEdit={handleOpenEditDialog} onDelete={handleDeleteRequest} />
       
       <AddWorkerDialog
-        isOpen={isAddWorkerOpen}
-        onOpenChange={setIsAddWorkerOpen}
-        onAddWorker={handleAddWorker}
+        isOpen={isWorkerDialogOpen}
+        onOpenChange={setIsWorkerDialogOpen}
+        onSaveWorker={handleAddOrEditWorker}
+        workerToEdit={workerToEdit}
       />
 
       <DeleteWorkerDialog

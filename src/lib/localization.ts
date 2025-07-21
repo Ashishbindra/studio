@@ -19,6 +19,8 @@ export const uiContent = {
   // Add Worker Dialog
   'dialog.add.worker.title': 'Add New Worker',
   'dialog.add.worker.description': "Enter the details of the new worker. Click save when you're done.",
+  'dialog.edit.worker.title': 'Edit Worker',
+  'dialog.edit.worker.description': "Update the worker's details. Click save when you're done.",
   'form.name.label': 'Name',
   'form.name.placeholder': 'e.g. Ramesh Kumar',
   'form.phone.label': 'Phone Number',

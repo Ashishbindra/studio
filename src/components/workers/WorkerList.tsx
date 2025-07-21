@@ -5,10 +5,11 @@ import WorkerCard from './WorkerCard';
 
 interface WorkerListProps {
   workers: Worker[];
+  onEdit: (worker: Worker) => void;
   onDelete: (worker: Worker) => void;
 }
 
-export default function WorkerList({ workers, onDelete }: WorkerListProps) {
+export default function WorkerList({ workers, onEdit, onDelete }: WorkerListProps) {
   if (workers.length === 0) {
     return <div className="text-center text-muted-foreground mt-10">No workers found. Add one to get started!</div>;
   }
@@ -25,6 +26,7 @@ export default function WorkerList({ workers, onDelete }: WorkerListProps) {
             worker={worker}
             attendances={workerAttendances}
             payments={workerPayments}
+            onEdit={onEdit}
             onDelete={onDelete}
           />
         )

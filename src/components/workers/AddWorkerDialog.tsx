@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,13 +15,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import type { Worker } from '@/lib/types';
 
 interface AddWorkerDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onAddWorker: (worker: Omit<Worker, 'id' | 'photoUrl'> & { photoUrl?: string }) => void;
+  onSaveWorker: (worker: Omit<Worker, 'id' | 'photoUrl'> & { photoUrl?: string }) => void;
+  workerToEdit: Worker | null;
 }
 
 const workerSchema = z.object({
@@ -32,30 +33,45 @@ const workerSchema = z.object({
 
 type WorkerFormData = z.infer<typeof workerSchema>;
 
-export default function AddWorkerDialog({ isOpen, onOpenChange, onAddWorker }: AddWorkerDialogProps) {
+export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, workerToEdit }: AddWorkerDialogProps) {
   const { t } = useLanguage();
-  const { toast } = useToast();
   
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<WorkerFormData>({
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<WorkerFormData>({
     resolver: zodResolver(workerSchema),
   });
 
+  useEffect(() => {
+    if (isOpen) {
+        if (workerToEdit) {
+            setValue('name', workerToEdit.name);
+            setValue('phoneNumber', workerToEdit.phoneNumber);
+            setValue('dailyWage', workerToEdit.dailyWage);
+            setValue('photoUrl', workerToEdit.photoUrl);
+        } else {
+            reset({name: '', phoneNumber: '', dailyWage: 0, photoUrl: ''});
+        }
+    }
+  }, [isOpen, workerToEdit, setValue, reset]);
+
+
   const onSubmit = (data: WorkerFormData) => {
-    onAddWorker(data);
-    toast({
-        title: "Worker Added",
-        description: `${data.name} has been successfully added.`,
-    })
+    onSaveWorker(data);
     reset();
     onOpenChange(false);
   };
+
+  const isEditing = !!workerToEdit;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-headline">{t('dialog.add.worker.title')}</DialogTitle>
-          <DialogDescription>{t('dialog.add.worker.description')}</DialogDescription>
+          <DialogTitle className="font-headline">
+            {isEditing ? t('dialog.edit.worker.title') : t('dialog.add.worker.title')}
+          </DialogTitle>
+          <DialogDescription>
+            {isEditing ? t('dialog.edit.worker.description') : t('dialog.add.worker.description')}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-4 py-4">
