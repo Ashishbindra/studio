@@ -49,19 +49,22 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const newTranslations: Partial<Record<UIContentKeys, string>> = {};
-      const translationPromises = Object.entries(uiContent).map(async ([key, value]) => {
-        const result = await translateUi({ text: value, targetLanguage: lang });
-        if (result.translatedText) {
-          newTranslations[key as UIContentKeys] = result.translatedText;
-        }
-      });
+      const textsToTranslate = Object.values(uiContent);
+      const translationResult = await translateUi({ texts: textsToTranslate, targetLanguage: lang });
 
-      await Promise.all(translationPromises);
+      if (translationResult.translatedTexts && translationResult.translatedTexts.length === textsToTranslate.length) {
+        const newTranslations: Partial<Record<UIContentKeys, string>> = {};
+        Object.keys(uiContent).forEach((key, index) => {
+          newTranslations[key as UIContentKeys] = translationResult.translatedTexts[index];
+        });
+        
+        const fullTranslations = { ...uiContent, ...newTranslations };
+        setTranslations(fullTranslations);
+        localStorage.setItem(`translations_${lang}`, JSON.stringify(fullTranslations));
+      } else {
+        throw new Error("Translation did not return the expected number of items.");
+      }
 
-      const fullTranslations = { ...uiContent, ...newTranslations };
-      setTranslations(fullTranslations);
-      localStorage.setItem(`translations_${lang}`, JSON.stringify(fullTranslations));
     } catch (error) {
       console.error("Failed to translate UI:", error);
       // Fallback to English

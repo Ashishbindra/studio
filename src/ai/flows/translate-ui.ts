@@ -12,13 +12,13 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const TranslateUiInputSchema = z.object({
-  text: z.string().describe('The text to translate.'),
+  texts: z.array(z.string()).describe('The text elements to translate.'),
   targetLanguage: z.enum(['en', 'hi']).describe('The target language for the translation (en for English, hi for Hindi).'),
 });
 export type TranslateUiInput = z.infer<typeof TranslateUiInputSchema>;
 
 const TranslateUiOutputSchema = z.object({
-  translatedText: z.string().describe('The translated text.'),
+  translatedTexts: z.array(z.string()).describe('The translated texts, in the same order as the input.'),
 });
 export type TranslateUiOutput = z.infer<typeof TranslateUiOutputSchema>;
 
@@ -30,12 +30,15 @@ const prompt = ai.definePrompt({
   name: 'translateUiPrompt',
   input: {schema: TranslateUiInputSchema},
   output: {schema: TranslateUiOutputSchema},
-  prompt: `You are a translation expert. Translate the given text to the target language.
+  prompt: `You are a translation expert. Translate the given JSON array of strings to the target language.
+Return a JSON array of the translated strings, maintaining the same order.
 
-Text: {{{text}}}
+Texts:
+{{json texts}}
+
 Target Language: {{{targetLanguage}}}
 
-Translation:`,
+Translation (JSON array of strings):`,
 });
 
 const translateUiFlow = ai.defineFlow(
