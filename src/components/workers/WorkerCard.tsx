@@ -12,9 +12,10 @@ interface WorkerCardProps {
   worker: Worker;
   attendances: Attendance[];
   payments: Payment[];
+  onDelete: (worker: Worker) => void;
 }
 
-export default function WorkerCard({ worker, attendances, payments }: WorkerCardProps) {
+export default function WorkerCard({ worker, attendances, payments, onDelete }: WorkerCardProps) {
   const { t } = useLanguage();
 
   const presentDays = attendances.filter(a => a.status === 'present').length;
@@ -70,11 +71,11 @@ export default function WorkerCard({ worker, attendances, payments }: WorkerCard
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-end gap-2">
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" disabled>
           <Pencil className="mr-2 h-4 w-4" />
           {t('dashboard.edit.worker')}
         </Button>
-        <Button variant="destructive" size="sm">
+        <Button variant="destructive" size="sm" onClick={() => onDelete(worker)}>
           <Trash2 className="mr-2 h-4 w-4" />
           {t('dashboard.delete.worker')}
         </Button>

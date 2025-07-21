@@ -30,6 +30,11 @@ export const uiContent = {
   'form.cancel': 'Cancel',
   'form.save': 'Save Changes',
 
+  // Delete Worker Dialog
+  'dialog.delete.worker.title': 'Are you sure you want to delete this worker?',
+  'dialog.delete.worker.description_p1': 'This will permanently delete the record for',
+  'dialog.delete.worker.description_p2': 'This action cannot be undone.',
+
   // Attendance Page
   'attendance.title': 'Daily Attendance',
   'attendance.date.label': "Attendance for:",
