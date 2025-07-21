@@ -8,41 +8,69 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { workers } from '@/lib/data';
+import { workers as initialWorkers } from '@/lib/data';
 import type { Attendance, Worker } from '@/lib/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
 
-type DailyAttendance = Omit<Attendance, 'id' | 'workerId' | 'date'>;
+type DailyAttendance = Pick<Attendance, 'status' | 'checkIn' | 'checkOut'>;
 
 export default function AttendanceSheet() {
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const [workers] = useState<Worker[]>(initialWorkers);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [attendanceRecords, setAttendanceRecords] = useState<Record<string, DailyAttendance>>({});
+  // Store all attendance records, keyed by date string and then workerId
+  const [allAttendance, setAllAttendance] = useState<Record<string, Record<string, DailyAttendance>>>({});
+
+  const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+  const attendanceForSelectedDate = allAttendance[formattedDate] || {};
 
   useEffect(() => {
-    // Here you would typically fetch attendance for the selected date
-    // For now, we'll reset the state when the date changes
-    setAttendanceRecords({});
+    // In a real app, you would fetch attendance data for the visible month
+    // For this prototype, we'll just manage it in state.
   }, [selectedDate]);
 
   const handleAttendance = (workerId: string, status: 'present' | 'absent') => {
-    setAttendanceRecords(prev => ({
-      ...prev,
-      [workerId]: {
+    setAllAttendance(prev => {
+      const newDateRecords = { ...prev[formattedDate] };
+      
+      const newRecord: DailyAttendance = {
         status,
         checkIn: status === 'present' ? new Date() : undefined,
-      }
-    }));
+      };
+
+      newDateRecords[workerId] = newRecord;
+
+      return {
+        ...prev,
+        [formattedDate]: newDateRecords
+      };
+    });
+    toast({
+      title: `Marked ${status}`,
+      description: `${workers.find(w => w.id === workerId)?.name} marked as ${status}.`
+    });
   };
 
   const handleCheckOut = (workerId: string) => {
-    setAttendanceRecords(prev => ({
-      ...prev,
-      [workerId]: {
-        ...prev[workerId],
+    setAllAttendance(prev => {
+      const newDateRecords = { ...prev[formattedDate] };
+      
+      newDateRecords[workerId] = {
+        ...newDateRecords[workerId],
         checkOut: new Date(),
-      }
-    }));
+      };
+
+      return {
+        ...prev,
+        [formattedDate]: newDateRecords
+      };
+    });
+     toast({
+      title: "Checked Out",
+      description: `${workers.find(w => w.id === workerId)?.name} has been checked out.`
+    });
   };
 
   return (
@@ -75,7 +103,7 @@ export default function AttendanceSheet() {
         </div>
         <div className="space-y-4">
           {workers.map((worker: Worker) => {
-            const record = attendanceRecords[worker.id];
+            const record = attendanceForSelectedDate[worker.id];
             return (
               <div key={worker.id} className="flex flex-col md:flex-row items-center justify-between p-4 rounded-lg border bg-card/50">
                 <div className="flex items-center gap-4 mb-4 md:mb-0">
