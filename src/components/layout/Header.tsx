@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageToggle from '@/components/LanguageToggle';
 import { cn } from '@/lib/utils';
-import { Sheet, Waypoints } from 'lucide-react';
+import { Sheet, Waypoints, CreditCard } from 'lucide-react';
 
 export default function Header() {
   const { t } = useLanguage();
@@ -13,6 +13,7 @@ export default function Header() {
   const navLinks = [
     { href: '/', labelKey: 'nav.dashboard', icon: <Sheet className="h-5 w-5" /> },
     { href: '/attendance', labelKey: 'nav.attendance', icon: <Waypoints className="h-5 w-5" /> },
+    { href: '/payments', labelKey: 'nav.payments', icon: <CreditCard className="h-5 w-5" /> },
   ];
 
   return (

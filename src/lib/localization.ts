@@ -3,6 +3,7 @@ export const uiContent = {
   'app.title': 'Shramik Hisab',
   'nav.dashboard': 'Dashboard',
   'nav.attendance': 'Attendance',
+  'nav.payments': 'Payments',
   'language.toggle.label': 'हिन्दी',
 
   // Dashboard Page
@@ -39,6 +40,13 @@ export const uiContent = {
   'attendance.status.absent': 'Absent',
   'attendance.not.marked': 'Not Marked',
   'status.present': 'Present',
+
+  // Payments Page
+  'payments.title': 'Payment Overview',
+  'payments.table.worker': 'Worker',
+  'payments.table.status': 'Status',
+  'payments.status.paid': 'Paid',
+  'payments.status.due': 'Due',
 };
 
 export type UIContentKeys = keyof typeof uiContent;
