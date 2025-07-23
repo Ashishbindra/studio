@@ -18,7 +18,7 @@ export default function DashboardPage() {
   const [workerToDelete, setWorkerToDelete] = useState<Worker | null>(null);
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
 
-  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id' | 'photoUrl'> & { photoUrl?: string }) => {
+  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id' | 'photoUrl' | 'dailyWage'> & { photoUrl?: string }) => {
     if (workerToEdit) {
       // Editing existing worker
       const updatedWorkers = workers.map(w =>
@@ -34,7 +34,8 @@ export default function DashboardPage() {
       const newWorker: Worker = {
         ...workerData,
         id: `w${workers.length + 1}`,
-        photoUrl: workerData.photoUrl || `https://placehold.co/100x100.png`
+        photoUrl: workerData.photoUrl || `https://placehold.co/100x100.png`,
+        dailyWage: 500, // Assign a default daily wage
       };
       setWorkers(prev => [...prev, newWorker]);
       toast({
