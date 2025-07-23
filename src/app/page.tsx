@@ -1,3 +1,4 @@
+
 'use client';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,6 @@ export default function DashboardPage() {
   const isInitialMount = useRef(true);
 
   useEffect(() => {
-    // Load workers from localStorage on initial render
     try {
       const savedWorkers = localStorage.getItem('workers');
       if (savedWorkers) {
@@ -31,35 +31,36 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    // Save workers to localStorage whenever the list changes, but skip the initial render.
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
     }
-    localStorage.setItem('workers', JSON.stringify(workers));
+    try {
+      localStorage.setItem('workers', JSON.stringify(workers));
+    } catch (error) {
+      console.error("Failed to save workers to localStorage", error);
+    }
   }, [workers]);
 
   const handleAddOrEditWorker = (workerData: Omit<Worker, 'id'>) => {
     if (workerToEdit) {
-      // Editing existing worker
       const updatedWorkers = workers.map(w =>
-        w.id === workerToEdit.id ? { ...w, ...workerData } : w
+        w.id === workerToEdit.id ? { ...workerToEdit, ...workerData } : w
       );
       setWorkers(updatedWorkers);
       toast({
-        title: "Worker Updated",
-        description: `${workerData.name}'s details have been updated.`,
+        title: t('toast.worker.updated.title'),
+        description: t('toast.worker.updated.description').replace('{workerName}', workerData.name),
       });
     } else {
-      // Adding new worker
       const newWorker: Worker = {
         ...workerData,
         id: `w${Date.now()}`,
       };
       setWorkers(prev => [...prev, newWorker]);
       toast({
-          title: "Worker Added",
-          description: `${newWorker.name} has been successfully added.`,
+          title: t('toast.worker.added.title'),
+          description: t('toast.worker.added.description').replace('{workerName}', newWorker.name),
       });
     }
     setWorkerToEdit(null);
@@ -84,8 +85,8 @@ export default function DashboardPage() {
     if (workerToDelete) {
       setWorkers(prev => prev.filter(w => w.id !== workerToDelete.id));
       toast({
-        title: "Worker Deleted",
-        description: `${workerToDelete.name} has been removed.`,
+        title: t('toast.worker.deleted.title'),
+        description: t('toast.worker.deleted.description').replace('{workerName}', workerToDelete.name),
         variant: "destructive",
       });
       setWorkerToDelete(null);
