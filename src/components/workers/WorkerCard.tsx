@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '../ui/button';
 import { Calendar, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface WorkerCardProps {
   worker: Worker;
@@ -20,6 +21,7 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
 
   const presentDays = attendances.filter(a => a.status === 'present').length;
   const absentDays = attendances.filter(a => a.status === 'absent').length;
+  const hasAttendance = attendances.length > 0;
 
   return (
     <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -61,10 +63,29 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
                 <Pencil className="mr-2 h-4 w-4"/>
                 {t('dashboard.edit.worker')}
             </Button>
-            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(worker)}>
-                <Trash2 className="mr-2 h-4 w-4"/>
-                {t('dashboard.delete.worker')}
-            </Button>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div className="inline-block">
+                             <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10" 
+                                onClick={() => onDelete(worker)}
+                                disabled={hasAttendance}
+                            >
+                                <Trash2 className="mr-2 h-4 w-4"/>
+                                {t('dashboard.delete.worker')}
+                            </Button>
+                        </div>
+                    </TooltipTrigger>
+                    {hasAttendance && (
+                        <TooltipContent>
+                            <p>Cannot delete a worker with attendance records.</p>
+                        </TooltipContent>
+                    )}
+                </Tooltip>
+            </TooltipProvider>
         </div>
       </CardFooter>
     </Card>
