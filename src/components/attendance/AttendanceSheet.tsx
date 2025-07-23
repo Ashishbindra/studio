@@ -1,5 +1,6 @@
+
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import { Calendar as CalendarIcon, Clock, LogIn, LogOut, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,38 +23,41 @@ export default function AttendanceSheet() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [allAttendance, setAllAttendance] = useState<Record<string, Record<string, DailyAttendance>>>({});
   const [historyWorker, setHistoryWorker] = useState<Worker | null>(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    const savedWorkers = localStorage.getItem('workers');
-    if (savedWorkers) {
-        try {
-            setWorkers(JSON.parse(savedWorkers));
-        } catch (e) {
-            console.error("Failed to parse workers from localStorage", e);
-            setWorkers([]);
-        }
-    }
-
-    const savedAttendance = localStorage.getItem('allAttendance');
-    if (savedAttendance) {
-        try {
-            const parsedAttendance = JSON.parse(savedAttendance);
-            Object.keys(parsedAttendance).forEach(date => {
-                Object.keys(parsedAttendance[date]).forEach(workerId => {
-                    const record = parsedAttendance[date][workerId];
-                    if (record.checkIn) record.checkIn = new Date(record.checkIn);
-                    if (record.checkOut) record.checkOut = new Date(record.checkOut);
-                });
-            });
-            setAllAttendance(parsedAttendance);
-        } catch(e) {
-            console.error("Failed to parse attendance from localStorage", e);
-        }
+    try {
+      const savedWorkers = localStorage.getItem('workers');
+      if (savedWorkers) {
+        setWorkers(JSON.parse(savedWorkers));
+      }
+      const savedAttendance = localStorage.getItem('allAttendance');
+      if (savedAttendance) {
+        const parsedAttendance = JSON.parse(savedAttendance);
+        Object.keys(parsedAttendance).forEach(date => {
+          Object.keys(parsedAttendance[date]).forEach(workerId => {
+            const record = parsedAttendance[date][workerId];
+            if (record.checkIn) record.checkIn = new Date(record.checkIn);
+            if (record.checkOut) record.checkOut = new Date(record.checkOut);
+          });
+        });
+        setAllAttendance(parsedAttendance);
+      }
+    } catch (error) {
+      console.error("Failed to parse data from localStorage", error);
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('allAttendance', JSON.stringify(allAttendance));
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    try {
+      localStorage.setItem('allAttendance', JSON.stringify(allAttendance));
+    } catch (error) {
+      console.error("Failed to save attendance to localStorage", error);
+    }
   }, [allAttendance]);
 
   const formattedDate = format(selectedDate, 'yyyy-MM-dd');
