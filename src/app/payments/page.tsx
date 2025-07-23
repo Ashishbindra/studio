@@ -1,5 +1,6 @@
+
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import PaymentHistoryTable from '@/components/payments/PaymentHistoryTable';
 import type { Worker, Payment } from '@/lib/types';
@@ -14,21 +15,34 @@ export default function PaymentsPage() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    const savedWorkers = localStorage.getItem('workers');
-    if (savedWorkers) {
-      setWorkers(JSON.parse(savedWorkers));
-    }
-    
-    const savedPayments = localStorage.getItem('payments');
-    if (savedPayments) {
-      setPayments(JSON.parse(savedPayments));
+    try {
+      const savedWorkers = localStorage.getItem('workers');
+      if (savedWorkers) {
+        setWorkers(JSON.parse(savedWorkers));
+      }
+      
+      const savedPayments = localStorage.getItem('payments');
+      if (savedPayments) {
+        setPayments(JSON.parse(savedPayments));
+      }
+    } catch (error) {
+      console.error("Failed to parse data from localStorage", error);
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('payments', JSON.stringify(payments));
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    try {
+      localStorage.setItem('payments', JSON.stringify(payments));
+    } catch (error) {
+      console.error("Failed to save payments to localStorage", error);
+    }
   }, [payments]);
 
   const handleAddPayment = (paymentData: Omit<Payment, 'id' | 'date'>) => {
