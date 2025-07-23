@@ -3,7 +3,7 @@ import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import WorkerList from '@/components/workers/WorkerList';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import AddWorkerDialog from '@/components/workers/AddWorkerDialog';
 import type { Worker } from '@/lib/types';
 import DeleteWorkerDialog from '@/components/workers/DeleteWorkerDialog';
@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [workerToDelete, setWorkerToDelete] = useState<Worker | null>(null);
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     // Load workers from localStorage on initial render
@@ -30,7 +31,11 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    // Save workers to localStorage whenever the list changes
+    // Save workers to localStorage whenever the list changes, but skip the initial render.
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     localStorage.setItem('workers', JSON.stringify(workers));
   }, [workers]);
 
