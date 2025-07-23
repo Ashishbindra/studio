@@ -24,22 +24,20 @@ export default function AttendanceSheet() {
   const [historyWorker, setHistoryWorker] = useState<Worker | null>(null);
 
   useEffect(() => {
-    // Load workers from localStorage
     const savedWorkers = localStorage.getItem('workers');
     if (savedWorkers) {
         try {
             setWorkers(JSON.parse(savedWorkers));
         } catch (e) {
             console.error("Failed to parse workers from localStorage", e);
+            setWorkers([]);
         }
     }
 
-    // Load attendance from localStorage
     const savedAttendance = localStorage.getItem('allAttendance');
     if (savedAttendance) {
         try {
             const parsedAttendance = JSON.parse(savedAttendance);
-            // Date objects need to be reconstructed
             Object.keys(parsedAttendance).forEach(date => {
                 Object.keys(parsedAttendance[date]).forEach(workerId => {
                     const record = parsedAttendance[date][workerId];
@@ -55,7 +53,6 @@ export default function AttendanceSheet() {
   }, []);
 
   useEffect(() => {
-    // Save attendance to localStorage
     localStorage.setItem('allAttendance', JSON.stringify(allAttendance));
   }, [allAttendance]);
 
@@ -166,7 +163,7 @@ export default function AttendanceSheet() {
                     />
                     <div>
                       <p className="font-semibold">{worker.name}</p>
-                      <p className="text-sm text-muted-foreground">₹{worker.dailyWage}</p>
+                      <p className="text-sm text-muted-foreground">₹{worker.dailyWage} {t('worker.wage.per.day')}</p>
                     </div>
                   </div>
 

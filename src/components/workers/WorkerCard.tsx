@@ -32,7 +32,7 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
         />
         <div className="flex-1">
           <CardTitle className="font-headline text-xl">{worker.name}</CardTitle>
-          <p className="text-sm text-muted-foreground">{worker.phoneNumber}</p>
+          <p className="text-sm text-muted-foreground">₹{worker.dailyWage} {t('worker.wage.per.day')}</p>
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-4 pt-0">
