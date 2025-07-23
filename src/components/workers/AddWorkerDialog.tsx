@@ -21,7 +21,7 @@ import type { Worker } from '@/lib/types';
 interface AddWorkerDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSaveWorker: (worker: Omit<Worker, 'id' | 'dailyWage' | 'photoUrl'> & { dailyWage: number, photoUrl: string }) => void;
+  onSaveWorker: (worker: Omit<Worker, 'id' | 'dailyWage' | 'photoUrl' | 'createdAt'> & { dailyWage: number, photoUrl: string }) => void;
   workerToEdit: Worker | null;
 }
 
@@ -110,4 +110,3 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
     </Dialog>
   );
 }
-

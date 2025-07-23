@@ -4,6 +4,7 @@ export interface Worker {
   photoUrl: string;
   dailyWage: number;
   phoneNumber: string;
+  createdAt: string;
 }
 
 export interface Attendance {

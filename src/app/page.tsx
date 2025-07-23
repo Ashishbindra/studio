@@ -42,7 +42,7 @@ export default function DashboardPage() {
     }
   }, [workers]);
 
-  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id'>) => {
+  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id' | 'createdAt'>) => {
     if (workerToEdit) {
       const updatedWorkers = workers.map(w =>
         w.id === workerToEdit.id ? { ...workerToEdit, ...workerData } : w
@@ -56,6 +56,7 @@ export default function DashboardPage() {
       const newWorker: Worker = {
         ...workerData,
         id: `w${Date.now()}`,
+        createdAt: new Date().toISOString(),
       };
       setWorkers(prev => [...prev, newWorker]);
       toast({

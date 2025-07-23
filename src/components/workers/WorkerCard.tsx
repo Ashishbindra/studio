@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import type { Worker, Attendance } from '@/lib/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '../ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Calendar, Pencil, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface WorkerCardProps {
   worker: Worker;
@@ -36,6 +37,10 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-4 pt-0">
+         <div className="flex items-center text-xs text-muted-foreground mb-2">
+            <Calendar className="h-3 w-3 mr-1.5" />
+            Joined on {format(new Date(worker.createdAt), 'do MMM yyyy')}
+        </div>
         <div className="grid grid-cols-2 gap-2 text-center text-sm">
           <div>
             <p className="text-muted-foreground">{t('status.present')}</p>
