@@ -25,8 +25,6 @@ export const uiContent = {
   'form.name.placeholder': 'e.g. Ramesh Kumar',
   'form.phone.label': 'Phone Number',
   'form.phone.placeholder': 'e.g. 9876543210',
-  'form.daily.wage.label': 'Daily Wage (₹)',
-  'form.daily.wage.placeholder': 'e.g. 500',
   'form.photo.url.label': 'Photo URL',
   'form.photo.url.placeholder': 'https://placehold.co/100x100.png',
   'form.cancel': 'Cancel',
@@ -65,6 +63,9 @@ export const uiContent = {
   'form.worker.placeholder': 'Select a worker',
   'form.payment.amount.label': 'Amount (₹)',
   'form.payment.amount.placeholder': 'e.g. 1000',
+  'form.payment.note.label': 'Note',
+  'form.payment.note.placeholder': 'e.g. Advance payment',
+
 
   // Toasts
   'toast.worker.added.title': 'Worker Added',

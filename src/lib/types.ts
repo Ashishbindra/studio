@@ -20,4 +20,5 @@ export interface Payment {
   workerId: string;
   date: string; // YYYY-MM-DD
   amount: number;
+  note?: string;
 }

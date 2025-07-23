@@ -18,6 +18,7 @@ import * as z from 'zod';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Worker, Payment } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '../ui/textarea';
 
 interface AddPaymentDialogProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ interface AddPaymentDialogProps {
 const paymentSchema = z.object({
   workerId: z.string().min(1, { message: 'Please select a worker.' }),
   amount: z.coerce.number().positive({ message: 'Payment amount must be a positive number.' }),
+  note: z.string().optional(),
 });
 
 type PaymentFormData = z.infer<typeof paymentSchema>;
@@ -44,7 +46,7 @@ export default function AddPaymentDialog({ isOpen, onOpenChange, onSavePayment, 
 
   useEffect(() => {
     if (!isOpen) {
-      reset({ workerId: '', amount: 0 });
+      reset({ workerId: '', amount: 0, note: '' });
     }
   }, [isOpen, reset]);
 
@@ -82,6 +84,12 @@ export default function AddPaymentDialog({ isOpen, onOpenChange, onSavePayment, 
               <div className="col-span-3">
                 <Input id="amount" type="number" {...register('amount')} placeholder={t('form.payment.amount.placeholder')} />
                 {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount.message}</p>}
+              </div>
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="note" className="text-right">{t('form.payment.note.label')}</Label>
+              <div className="col-span-3">
+                <Textarea id="note" {...register('note')} placeholder={t('form.payment.note.placeholder')} />
               </div>
             </div>
           </div>
