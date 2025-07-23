@@ -30,7 +30,7 @@ const workerSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   phoneNumber: z.string().regex(/^\d{10}$/, { message: 'Phone number must be 10 digits.' }),
   dailyWage: z.coerce.number().positive({ message: 'Daily wage must be a positive number.' }),
-  photoUrl: z.string().url({ message: 'Please provide a valid photo URL.' }),
+  photoUrl: z.string().optional(),
 });
 
 type WorkerFormData = z.infer<typeof workerSchema>;
@@ -62,6 +62,7 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
         } else {
             reset();
             setPhotoPreview('');
+            generatePlaceholder(true); // Generate photo for new worker silently
         }
     }
   }, [isOpen, workerToEdit, setValue, reset]);
@@ -80,15 +81,20 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
     onOpenChange(open);
   };
   
-  const generatePlaceholder = () => {
+  const generatePlaceholder = (silent = false) => {
       const randomId = Math.floor(Math.random() * 1000);
-      const url = `https://placehold.co/100x100.png?text=${randomId}`;
-      setValue('photoUrl', url, { shouldValidate: true });
-      setPhotoPreview(url);
+      const url = `https://placehold.co/100x100.png`;
+      setValue('photoUrl', url, { shouldValidate: !silent, shouldDirty: !silent });
+      if(!silent) {
+        setPhotoPreview(url);
+      }
   };
 
   const onSubmit = (data: WorkerFormData) => {
-    onSaveWorker(data);
+    onSaveWorker({
+        ...data,
+        photoUrl: data.photoUrl || `https://placehold.co/100x100.png`
+    });
   };
 
   const isEditing = !!workerToEdit;
@@ -135,13 +141,12 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
                  ) : (
                     <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No img</div>
                  )}
-                 <Button type="button" variant="outline" size="sm" onClick={generatePlaceholder}>
+                 <Button type="button" variant="outline" size="sm" onClick={() => generatePlaceholder()}>
                     <RefreshCw className="mr-2 h-4 w-4"/>
                     {t('form.generate.photo')}
                  </Button>
                </div>
             </div>
-             {errors.photoUrl && <p className="col-span-4 text-red-500 text-xs mt-1 text-center">{errors.photoUrl.message}</p>}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>{t('form.cancel')}</Button>
