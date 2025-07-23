@@ -1,3 +1,4 @@
+
 'use client';
 import Image from 'next/image';
 import {
@@ -20,12 +21,11 @@ interface PaymentHistoryTableProps {
 export default function PaymentHistoryTable({ workers, payments }: PaymentHistoryTableProps) {
   const { t } = useLanguage();
 
-  const getWorkerName = (workerId: string) => {
-    const worker = workers.find(w => w.id === workerId);
-    return worker ? worker.name : 'Unknown Worker';
-  };
+  const workerMap = new Map(workers.map(w => [w.id, w.name]));
 
-  if (payments.length === 0) {
+  const validPayments = payments.filter(p => workerMap.has(p.workerId));
+
+  if (validPayments.length === 0) {
     return <div className="text-center text-muted-foreground mt-10">No payment records found.</div>;
   }
 
@@ -41,9 +41,9 @@ export default function PaymentHistoryTable({ workers, payments }: PaymentHistor
           </TableRow>
         </TableHeader>
         <TableBody>
-          {payments.map(payment => (
+          {validPayments.map(payment => (
             <TableRow key={payment.id}>
-              <TableCell className="font-medium">{getWorkerName(payment.workerId)}</TableCell>
+              <TableCell className="font-medium">{workerMap.get(payment.workerId)}</TableCell>
               <TableCell>{format(new Date(payment.date), 'PPP')}</TableCell>
               <TableCell className="text-right">₹{payment.amount.toLocaleString()}</TableCell>
               <TableCell>{payment.note || '-'}</TableCell>
