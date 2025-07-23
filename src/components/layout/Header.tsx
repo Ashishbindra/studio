@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageToggle from '@/components/LanguageToggle';
 import { cn } from '@/lib/utils';
-import { Sheet, Waypoints, CreditCard } from 'lucide-react';
+import { Sheet, Waypoints, CreditCard, UserCog } from 'lucide-react';
 
 export default function Header() {
   const { t } = useLanguage();
@@ -14,6 +14,7 @@ export default function Header() {
     { href: '/', labelKey: 'nav.dashboard', icon: <Sheet className="h-5 w-5" /> },
     { href: '/attendance', labelKey: 'nav.attendance', icon: <Waypoints className="h-5 w-5" /> },
     { href: '/payments', labelKey: 'nav.payments', icon: <CreditCard className="h-5 w-5" /> },
+    { href: '/worker-payment', labelKey: 'nav.worker.payment', icon: <UserCog className="h-5 w-5" /> },
   ];
 
   return (

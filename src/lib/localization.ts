@@ -4,6 +4,7 @@ export const uiContent = {
   'nav.dashboard': 'Dashboard',
   'nav.attendance': 'Attendance',
   'nav.payments': 'Payments',
+  'nav.worker.payment': 'Worker Payment',
   'language.toggle.label': 'हिन्दी',
 
   // Dashboard Page
@@ -39,7 +40,7 @@ export const uiContent = {
 
   // Attendance Page
   'attendance.title': 'Daily Attendance',
-  'attendance.date.label': "Attendance for:",
+  'attendance.date.label': "Date",
   'attendance.mark.present': 'Present',
   'attendance.mark.absent': 'Absent',
   'attendance.checked.in.at': 'Checked in at',
@@ -51,19 +52,27 @@ export const uiContent = {
   'status.present': 'Present',
 
   // Payments Page
-  'payments.title': 'Payment Overview',
+  'payments.title': 'Payment History',
   'payments.record.payment': 'Record Payment',
   'payments.table.worker': 'Worker',
   'payments.table.status': 'Status',
   'payments.status.paid': 'Paid',
   'payments.status.due': 'Due',
 
+  // Worker Payment Page
+  'worker.payment.title': 'Worker Payment Summary',
+  'worker.payment.table.worker': 'Worker',
+  'worker.payment.table.present.days': 'Present Days',
+  'worker.payment.table.total.earned': 'Total Earned',
+  'worker.payment.table.total.paid': 'Total Paid',
+  'worker.payment.table.balance': 'Balance',
+
   // Add Payment Dialog
   'dialog.record.payment.title': 'Record a Payment',
   'dialog.record.payment.description': "Select a worker and enter the amount paid.",
   'form.worker.label': 'Worker',
   'form.worker.placeholder': 'Select a worker',
-  'form.payment.amount.label': 'Amount (₹)',
+  'form.payment.amount.label': 'Amount',
   'form.payment.amount.placeholder': 'e.g. 1000',
   'form.payment.note.label': 'Note',
   'form.payment.note.placeholder': 'e.g. Advance payment',

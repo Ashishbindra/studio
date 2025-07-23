@@ -15,6 +15,7 @@ export default function PaymentsPage() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  
   const isInitialMount = useRef(true);
 
   useEffect(() => {
@@ -35,8 +36,8 @@ export default function PaymentsPage() {
 
   useEffect(() => {
     if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
+        isInitialMount.current = false;
+        return;
     }
     try {
       localStorage.setItem('payments', JSON.stringify(payments));
