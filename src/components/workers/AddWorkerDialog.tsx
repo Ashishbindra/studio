@@ -38,6 +38,11 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
   
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<WorkerFormData>({
     resolver: zodResolver(workerSchema),
+    defaultValues: {
+      name: '',
+      phoneNumber: '',
+      photoUrl: '',
+    }
   });
 
   useEffect(() => {
@@ -48,7 +53,7 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
             setValue('dailyWage', workerToEdit.dailyWage);
             setValue('photoUrl', workerToEdit.photoUrl);
         } else {
-            reset({name: '', phoneNumber: '', dailyWage: 0, photoUrl: ''});
+            reset();
         }
     }
   }, [isOpen, workerToEdit, setValue, reset]);
