@@ -22,14 +22,13 @@ import { RefreshCw } from 'lucide-react';
 interface AddWorkerDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSaveWorker: (worker: Omit<Worker, 'id'> & { photoUrl: string }) => void;
+  onSaveWorker: (worker: Omit<Worker, 'id' | 'dailyWage'> & { photoUrl: string, dailyWage: number }) => void;
   workerToEdit: Worker | null;
 }
 
 const workerSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   phoneNumber: z.string().regex(/^\d{10}$/, { message: 'Phone number must be 10 digits.' }),
-  dailyWage: z.coerce.number().positive({ message: 'Daily wage must be a positive number.' }),
   photoUrl: z.string().url().optional(),
 });
 
@@ -44,7 +43,6 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
     defaultValues: {
       name: '',
       phoneNumber: '',
-      dailyWage: undefined,
       photoUrl: '',
     }
   });
@@ -56,7 +54,6 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
         if (workerToEdit) {
             setValue('name', workerToEdit.name);
             setValue('phoneNumber', workerToEdit.phoneNumber);
-            setValue('dailyWage', workerToEdit.dailyWage);
             setValue('photoUrl', workerToEdit.photoUrl);
             setPhotoPreview(workerToEdit.photoUrl);
         } else {
@@ -91,6 +88,7 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
   const onSubmit = (data: WorkerFormData) => {
     onSaveWorker({
         ...data,
+        dailyWage: 300,
         photoUrl: data.photoUrl || `https://placehold.co/100x100.png`
     });
   };
@@ -122,13 +120,6 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
               <div className="col-span-3">
                 <Input id="phoneNumber" {...register('phoneNumber')} placeholder={t('form.phone.placeholder')} />
                 {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber.message}</p>}
-              </div>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="dailyWage" className="text-right">{t('form.daily.wage.label')}</Label>
-              <div className="col-span-3">
-                <Input id="dailyWage" type="number" {...register('dailyWage')} placeholder={t('form.daily.wage.placeholder')} />
-                {errors.dailyWage && <p className="text-red-500 text-xs mt-1">{errors.dailyWage.message}</p>}
               </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">

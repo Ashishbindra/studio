@@ -39,7 +39,7 @@ export default function DashboardPage() {
     localStorage.setItem('workers', JSON.stringify(workers));
   }, [workers]);
 
-  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id'> & { photoUrl: string }) => {
+  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id'>) => {
     if (workerToEdit) {
       // Editing existing worker
       const updatedWorkers = workers.map(w =>
