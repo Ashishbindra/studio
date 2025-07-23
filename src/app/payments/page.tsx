@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import PaymentHistoryTable from '@/components/payments/PaymentHistoryTable';
 import type { Worker, Payment } from '@/lib/types';
@@ -16,8 +16,6 @@ export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   
-  const isInitialMount = useRef(true);
-
   useEffect(() => {
     try {
       const savedWorkers = localStorage.getItem('workers');
@@ -35,10 +33,6 @@ export default function PaymentsPage() {
   }, []);
 
   useEffect(() => {
-    if (isInitialMount.current) {
-        isInitialMount.current = false;
-        return;
-    }
     try {
       localStorage.setItem('payments', JSON.stringify(payments));
     } catch (error) {
@@ -65,7 +59,7 @@ export default function PaymentsPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold font-headline">{t('payments.title')}</h1>
-        <Button onClick={() => setIsPaymentDialogOpen(true)} className="bg-accent hover:bg-accent/90">
+        <Button onClick={() => setIsPaymentDialogOpen(true)} className="bg-accent hover:bg-accent/90" disabled={workers.length === 0}>
           <PlusCircle className="mr-2 h-5 w-5" />
           {t('payments.record.payment')}
         </Button>

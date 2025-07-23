@@ -24,7 +24,6 @@ export default function AttendanceSheet() {
   const [allAttendance, setAllAttendance] = useState<Record<string, Record<string, DailyAttendance>>>({});
   const [payments, setPayments] = useState<Payment[]>([]);
   const [historyWorker, setHistoryWorker] = useState<Worker | null>(null);
-  const isInitialMount = useRef(true);
 
   useEffect(() => {
     try {
@@ -54,17 +53,21 @@ export default function AttendanceSheet() {
   }, []);
 
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
     try {
       localStorage.setItem('allAttendance', JSON.stringify(allAttendance));
-      localStorage.setItem('payments', JSON.stringify(payments));
     } catch (error) {
-      console.error("Failed to save data to localStorage", error);
+      console.error("Failed to save attendance to localStorage", error);
     }
-  }, [allAttendance, payments]);
+  }, [allAttendance]);
+
+  useEffect(() => {
+    try {
+        localStorage.setItem('payments', JSON.stringify(payments));
+    } catch (error) {
+        console.error("Failed to save payments to localStorage", error);
+    }
+  }, [payments]);
+
 
   const formattedDate = format(selectedDate, 'yyyy-MM-dd');
   const attendanceForSelectedDate = allAttendance[formattedDate] || {};
@@ -103,10 +106,10 @@ export default function AttendanceSheet() {
       };
     });
     
-    // Auto-handle payments
+    const worker = workers.find(w => w.id === workerId);
+    if (!worker) return;
+
     if (status === 'present') {
-      const worker = workers.find(w => w.id === workerId);
-      if (worker) {
         const newPayment: Payment = {
           id: `p-att-${formattedDate}-${workerId}`,
           workerId: workerId,
@@ -114,18 +117,20 @@ export default function AttendanceSheet() {
           amount: worker.dailyWage,
           note: `Daily wage for attendance on ${format(selectedDate, 'PPP')}`,
         };
-        // Add payment only if it doesn't exist for that day for that worker
-        setPayments(prev => prev.find(p => p.id === newPayment.id) ? prev : [newPayment, ...prev]);
-      }
+        setPayments(prev => {
+            if (prev.find(p => p.id === newPayment.id)) {
+                return prev;
+            }
+            return [newPayment, ...prev];
+        });
     } else if (status === 'absent') {
-      // Remove payment if worker is marked absent
       const paymentIdToRemove = `p-att-${formattedDate}-${workerId}`;
       setPayments(prev => prev.filter(p => p.id !== paymentIdToRemove));
     }
 
     toast({
       title: `Marked ${status}`,
-      description: `${workers.find(w => w.id === workerId)?.name} marked as ${status}.`
+      description: `${worker.name} marked as ${status}.`
     });
   };
 

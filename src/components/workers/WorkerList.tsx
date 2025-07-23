@@ -1,3 +1,4 @@
+
 'use client';
 import type { Worker, Attendance } from '@/lib/types';
 import WorkerCard from './WorkerCard';
@@ -13,9 +14,9 @@ export default function WorkerList({ workers, onEdit, onDelete }: WorkerListProp
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   
   useEffect(() => {
-    const savedAttendances = localStorage.getItem('allAttendance');
-    if(savedAttendances) {
-        try {
+    try {
+        const savedAttendances = localStorage.getItem('allAttendance');
+        if(savedAttendances) {
             const parsedAttendance = JSON.parse(savedAttendances);
             const newAttendances: Attendance[] = [];
             Object.entries(parsedAttendance).forEach(([date, dateRecords]) => {
@@ -31,11 +32,11 @@ export default function WorkerList({ workers, onEdit, onDelete }: WorkerListProp
                 });
             });
             setAttendances(newAttendances);
-        } catch (e) {
-            console.error("Failed to parse attendance from localStorage", e);
         }
+    } catch (e) {
+        console.error("Failed to parse attendance from localStorage", e);
     }
-  }, [workers]); // Rerun when workers change, but primary attendance data comes from localStorage
+  }, []);
 
 
   if (workers.length === 0) {

@@ -17,8 +17,8 @@ export default function DashboardPage() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [workerToDelete, setWorkerToDelete] = useState<Worker | null>(null);
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
-  const isInitialMount = useRef(true);
-
+  
+  // Load workers from localStorage on initial mount
   useEffect(() => {
     try {
       const savedWorkers = localStorage.getItem('workers');
@@ -30,11 +30,8 @@ export default function DashboardPage() {
     }
   }, []);
 
+  // Save workers to localStorage whenever the workers state changes
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
     try {
       localStorage.setItem('workers', JSON.stringify(workers));
     } catch (error) {
@@ -44,10 +41,11 @@ export default function DashboardPage() {
 
   const handleAddOrEditWorker = (workerData: Omit<Worker, 'id' | 'createdAt'>) => {
     if (workerToEdit) {
-      const updatedWorkers = workers.map(w =>
-        w.id === workerToEdit.id ? { ...workerToEdit, ...workerData } : w
+      setWorkers(prevWorkers => 
+        prevWorkers.map(w =>
+          w.id === workerToEdit.id ? { ...workerToEdit, ...workerData } : w
+        )
       );
-      setWorkers(updatedWorkers);
       toast({
         title: t('toast.worker.updated.title'),
         description: t('toast.worker.updated.description').replace('{workerName}', workerData.name),
