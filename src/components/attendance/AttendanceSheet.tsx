@@ -8,11 +8,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { workers as initialWorkers, attendances as initialAttendances } from '@/lib/data';
 import type { Attendance, Worker } from '@/lib/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import HistorySheet from '@/components/attendance/HistorySheet';
+import { attendances as initialAttendances } from '@/lib/data';
 
 type DailyAttendance = Pick<Attendance, 'status' | 'checkIn' | 'checkOut'>;
 
@@ -28,8 +28,6 @@ export default function AttendanceSheet() {
     const savedWorkers = localStorage.getItem('workers');
     if (savedWorkers) {
         setWorkers(JSON.parse(savedWorkers));
-    } else {
-        setWorkers(initialWorkers);
     }
 
     const savedAttendance = localStorage.getItem('allAttendance');
