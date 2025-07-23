@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { Calendar as CalendarIcon, Clock, LogIn, LogOut, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,29 @@ export default function AttendanceSheet() {
 
   const formattedDate = format(selectedDate, 'yyyy-MM-dd');
   const attendanceForSelectedDate = allAttendance[formattedDate] || {};
+
+  const combinedAttendances = useMemo(() => {
+    const newAttendances: Attendance[] = [];
+    Object.entries(allAttendance).forEach(([date, dateRecords]) => {
+      Object.entries(dateRecords).forEach(([workerId, record]) => {
+        newAttendances.push({
+          id: `att-${date}-${workerId}`,
+          workerId,
+          date,
+          status: record.status,
+          checkIn: record.checkIn,
+          checkOut: record.checkOut,
+        });
+      });
+    });
+
+    const uniqueAttendances = new Map<string, Attendance>();
+    initialAttendances.forEach(att => uniqueAttendances.set(`${att.date}-${att.workerId}`, att));
+    newAttendances.forEach(att => uniqueAttendances.set(`${att.date}-${att.workerId}`, att));
+
+    return Array.from(uniqueAttendances.values());
+
+  }, [allAttendance]);
 
   useEffect(() => {
     // In a real app, you would fetch attendance data for the visible month
@@ -169,7 +192,7 @@ export default function AttendanceSheet() {
       </Card>
       <HistorySheet
         worker={historyWorker}
-        allAttendances={initialAttendances}
+        allAttendances={combinedAttendances}
         isOpen={!!historyWorker}
         onOpenChange={() => setHistoryWorker(null)}
       />
