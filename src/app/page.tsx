@@ -18,20 +18,23 @@ export default function DashboardPage() {
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
 
   useEffect(() => {
-    const savedWorkers = localStorage.getItem('workers');
-    if (savedWorkers) {
-      setWorkers(JSON.parse(savedWorkers));
+    // Load workers from localStorage on initial render
+    try {
+      const savedWorkers = localStorage.getItem('workers');
+      if (savedWorkers) {
+        setWorkers(JSON.parse(savedWorkers));
+      }
+    } catch (error) {
+      console.error("Failed to parse workers from localStorage", error);
     }
   }, []);
 
   useEffect(() => {
-    // This effect ensures that we don't overwrite the stored workers with an empty array on initial load
-    if (workers.length > 0 || localStorage.getItem('workers')) {
-        localStorage.setItem('workers', JSON.stringify(workers));
-    }
+    // Save workers to localStorage whenever the list changes
+    localStorage.setItem('workers', JSON.stringify(workers));
   }, [workers]);
 
-  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id'>) => {
+  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id'> & { photoUrl: string }) => {
     if (workerToEdit) {
       // Editing existing worker
       const updatedWorkers = workers.map(w =>

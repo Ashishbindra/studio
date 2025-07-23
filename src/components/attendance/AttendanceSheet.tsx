@@ -12,7 +12,6 @@ import type { Attendance, Worker } from '@/lib/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import HistorySheet from '@/components/attendance/HistorySheet';
-import { attendances as initialAttendances } from '@/lib/data';
 
 type DailyAttendance = Pick<Attendance, 'status' | 'checkIn' | 'checkOut'>;
 
@@ -25,27 +24,38 @@ export default function AttendanceSheet() {
   const [historyWorker, setHistoryWorker] = useState<Worker | null>(null);
 
   useEffect(() => {
+    // Load workers from localStorage
     const savedWorkers = localStorage.getItem('workers');
     if (savedWorkers) {
-        setWorkers(JSON.parse(savedWorkers));
+        try {
+            setWorkers(JSON.parse(savedWorkers));
+        } catch (e) {
+            console.error("Failed to parse workers from localStorage", e);
+        }
     }
 
+    // Load attendance from localStorage
     const savedAttendance = localStorage.getItem('allAttendance');
     if (savedAttendance) {
-        const parsedAttendance = JSON.parse(savedAttendance);
-        // Date objects need to be reconstructed
-        Object.keys(parsedAttendance).forEach(date => {
-            Object.keys(parsedAttendance[date]).forEach(workerId => {
-                const record = parsedAttendance[date][workerId];
-                if (record.checkIn) record.checkIn = new Date(record.checkIn);
-                if (record.checkOut) record.checkOut = new Date(record.checkOut);
+        try {
+            const parsedAttendance = JSON.parse(savedAttendance);
+            // Date objects need to be reconstructed
+            Object.keys(parsedAttendance).forEach(date => {
+                Object.keys(parsedAttendance[date]).forEach(workerId => {
+                    const record = parsedAttendance[date][workerId];
+                    if (record.checkIn) record.checkIn = new Date(record.checkIn);
+                    if (record.checkOut) record.checkOut = new Date(record.checkOut);
+                });
             });
-        });
-        setAllAttendance(parsedAttendance);
+            setAllAttendance(parsedAttendance);
+        } catch(e) {
+            console.error("Failed to parse attendance from localStorage", e);
+        }
     }
   }, []);
 
   useEffect(() => {
+    // Save attendance to localStorage
     localStorage.setItem('allAttendance', JSON.stringify(allAttendance));
   }, [allAttendance]);
 
@@ -66,13 +76,7 @@ export default function AttendanceSheet() {
         });
       });
     });
-
-    const uniqueAttendances = new Map<string, Attendance>();
-    initialAttendances.forEach(att => uniqueAttendances.set(`${att.date}-${att.workerId}`, att));
-    newAttendances.forEach(att => uniqueAttendances.set(`${att.date}-${att.workerId}`, att));
-
-    return Array.from(uniqueAttendances.values());
-
+    return newAttendances;
   }, [allAttendance]);
 
   const handleAttendance = (workerId: string, status: 'present' | 'absent') => {

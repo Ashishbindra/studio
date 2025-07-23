@@ -22,7 +22,7 @@ import { RefreshCw } from 'lucide-react';
 interface AddWorkerDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSaveWorker: (worker: Omit<Worker, 'id'>) => void;
+  onSaveWorker: (worker: Omit<Worker, 'id'> & { photoUrl: string }) => void;
   workerToEdit: Worker | null;
 }
 
@@ -30,7 +30,7 @@ const workerSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   phoneNumber: z.string().regex(/^\d{10}$/, { message: 'Phone number must be 10 digits.' }),
   dailyWage: z.coerce.number().positive({ message: 'Daily wage must be a positive number.' }),
-  photoUrl: z.string().optional(),
+  photoUrl: z.string().url().optional(),
 });
 
 type WorkerFormData = z.infer<typeof workerSchema>;
@@ -49,7 +49,7 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
     }
   });
 
-  const photoUrl = watch('photoUrl');
+  const photoUrlValue = watch('photoUrl');
 
   useEffect(() => {
     if (isOpen) {
@@ -61,17 +61,18 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
             setPhotoPreview(workerToEdit.photoUrl);
         } else {
             reset();
-            setPhotoPreview('');
-            generatePlaceholder(true); // Generate photo for new worker silently
+            const randomUrl = `https://placehold.co/100x100.png?text=${Math.random()}`;
+            setValue('photoUrl', randomUrl);
+            setPhotoPreview(randomUrl);
         }
     }
   }, [isOpen, workerToEdit, setValue, reset]);
 
   useEffect(() => {
-    if (photoUrl) {
-      setPhotoPreview(photoUrl);
+    if (photoUrlValue) {
+      setPhotoPreview(photoUrlValue);
     }
-  }, [photoUrl]);
+  }, [photoUrlValue]);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -81,13 +82,10 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
     onOpenChange(open);
   };
   
-  const generatePlaceholder = (silent = false) => {
-      const randomId = Math.floor(Math.random() * 1000);
-      const url = `https://placehold.co/100x100.png`;
-      setValue('photoUrl', url, { shouldValidate: !silent, shouldDirty: !silent });
-      if(!silent) {
-        setPhotoPreview(url);
-      }
+  const generatePlaceholder = () => {
+      const url = `https://placehold.co/100x100.png?text=${Math.random()}`;
+      setValue('photoUrl', url, { shouldValidate: true, shouldDirty: true });
+      setPhotoPreview(url);
   };
 
   const onSubmit = (data: WorkerFormData) => {
@@ -141,7 +139,7 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
                  ) : (
                     <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No img</div>
                  )}
-                 <Button type="button" variant="outline" size="sm" onClick={() => generatePlaceholder()}>
+                 <Button type="button" variant="outline" size="sm" onClick={generatePlaceholder}>
                     <RefreshCw className="mr-2 h-4 w-4"/>
                     {t('form.generate.photo')}
                  </Button>
