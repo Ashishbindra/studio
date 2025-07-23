@@ -1,8 +1,10 @@
 'use client';
 import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import type { Worker, Attendance } from '@/lib/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Button } from '../ui/button';
+import { Pencil, Trash2 } from 'lucide-react';
 
 interface WorkerCardProps {
   worker: Worker;
@@ -11,7 +13,7 @@ interface WorkerCardProps {
   onDelete: (worker: Worker) => void;
 }
 
-export default function WorkerCard({ worker, attendances }: WorkerCardProps) {
+export default function WorkerCard({ worker, attendances, onEdit, onDelete }: WorkerCardProps) {
   const { t } = useLanguage();
 
   const presentDays = attendances.filter(a => a.status === 'present').length;
@@ -26,10 +28,11 @@ export default function WorkerCard({ worker, attendances }: WorkerCardProps) {
           width={80}
           height={80}
           className="rounded-full border-2 border-primary/50 object-cover"
-          data-ai-hint={(worker as any).dataAiHint}
+          data-ai-hint={(worker as any).dataAiHint || 'person'}
         />
         <div className="flex-1">
           <CardTitle className="font-headline text-xl">{worker.name}</CardTitle>
+          <p className="text-sm text-muted-foreground">{worker.phoneNumber}</p>
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-4 pt-0">
@@ -44,6 +47,18 @@ export default function WorkerCard({ worker, attendances }: WorkerCardProps) {
           </div>
         </div>
       </CardContent>
+       <CardFooter className="p-2 bg-card/50">
+        <div className="flex w-full justify-end gap-2">
+            <Button variant="ghost" size="sm" onClick={() => onEdit(worker)}>
+                <Pencil className="mr-2 h-4 w-4"/>
+                {t('dashboard.edit.worker')}
+            </Button>
+            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(worker)}>
+                <Trash2 className="mr-2 h-4 w-4"/>
+                {t('dashboard.delete.worker')}
+            </Button>
+        </div>
+      </CardFooter>
     </Card>
   );
 }

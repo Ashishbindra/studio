@@ -25,8 +25,10 @@ export const uiContent = {
   'form.name.placeholder': 'e.g. Ramesh Kumar',
   'form.phone.label': 'Phone Number',
   'form.phone.placeholder': 'e.g. 9876543210',
-  'form.photo.url.label': 'Photo URL',
-  'form.photo.url.placeholder': 'https://placehold.co/100x100.png',
+  'form.daily.wage.label': 'Daily Wage (₹)',
+  'form.daily.wage.placeholder': 'e.g. 500',
+  'form.photo.label': 'Photo',
+  'form.generate.photo': 'Generate',
   'form.cancel': 'Cancel',
   'form.save': 'Save Changes',
 

@@ -6,7 +6,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
 import AddWorkerDialog from '@/components/workers/AddWorkerDialog';
 import type { Worker } from '@/lib/types';
-import { workers as initialWorkers } from '@/lib/data';
 import DeleteWorkerDialog from '@/components/workers/DeleteWorkerDialog';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,22 +21,21 @@ export default function DashboardPage() {
     const savedWorkers = localStorage.getItem('workers');
     if (savedWorkers) {
       setWorkers(JSON.parse(savedWorkers));
-    } else {
-      setWorkers(initialWorkers);
     }
   }, []);
 
   useEffect(() => {
+    // This effect ensures that we don't overwrite the stored workers with an empty array on initial load
     if (workers.length > 0 || localStorage.getItem('workers')) {
         localStorage.setItem('workers', JSON.stringify(workers));
     }
   }, [workers]);
 
-  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id' | 'photoUrl' | 'dailyWage'> & { photoUrl?: string }) => {
+  const handleAddOrEditWorker = (workerData: Omit<Worker, 'id'>) => {
     if (workerToEdit) {
       // Editing existing worker
       const updatedWorkers = workers.map(w =>
-        w.id === workerToEdit.id ? { ...w, ...workerData, photoUrl: workerData.photoUrl || w.photoUrl } : w
+        w.id === workerToEdit.id ? { ...w, ...workerData } : w
       );
       setWorkers(updatedWorkers);
       toast({
@@ -49,8 +47,6 @@ export default function DashboardPage() {
       const newWorker: Worker = {
         ...workerData,
         id: `w${Date.now()}`,
-        photoUrl: workerData.photoUrl || `https://placehold.co/100x100.png`,
-        dailyWage: 500, // Assign a default daily wage
       };
       setWorkers(prev => [...prev, newWorker]);
       toast({
@@ -93,7 +89,7 @@ export default function DashboardPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold font-headline">{t('dashboard.title')}</h1>
-        <Button onClick={handleOpenAddDialog}>
+        <Button onClick={handleOpenAddDialog} className="bg-accent hover:bg-accent/90">
           <PlusCircle className="mr-2 h-5 w-5" />
           {t('dashboard.add.worker')}
         </Button>
