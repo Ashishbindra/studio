@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import type { Attendance, Worker } from '@/lib/types';
+import type { Attendance, Worker, Payment } from '@/lib/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import HistorySheet from '@/components/attendance/HistorySheet';
@@ -22,6 +22,7 @@ export default function AttendanceSheet() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [allAttendance, setAllAttendance] = useState<Record<string, Record<string, DailyAttendance>>>({});
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [historyWorker, setHistoryWorker] = useState<Worker | null>(null);
   const isInitialMount = useRef(true);
 
@@ -43,6 +44,10 @@ export default function AttendanceSheet() {
         });
         setAllAttendance(parsedAttendance);
       }
+       const savedPayments = localStorage.getItem('payments');
+        if (savedPayments) {
+            setPayments(JSON.parse(savedPayments));
+        }
     } catch (error) {
       console.error("Failed to parse data from localStorage", error);
     }
@@ -55,10 +60,11 @@ export default function AttendanceSheet() {
     }
     try {
       localStorage.setItem('allAttendance', JSON.stringify(allAttendance));
+      localStorage.setItem('payments', JSON.stringify(payments));
     } catch (error) {
-      console.error("Failed to save attendance to localStorage", error);
+      console.error("Failed to save data to localStorage", error);
     }
-  }, [allAttendance]);
+  }, [allAttendance, payments]);
 
   const formattedDate = format(selectedDate, 'yyyy-MM-dd');
   const attendanceForSelectedDate = allAttendance[formattedDate] || {};
@@ -96,6 +102,27 @@ export default function AttendanceSheet() {
         [formattedDate]: newDateRecords
       };
     });
+    
+    // Auto-handle payments
+    if (status === 'present') {
+      const worker = workers.find(w => w.id === workerId);
+      if (worker) {
+        const newPayment: Payment = {
+          id: `p-att-${formattedDate}-${workerId}`,
+          workerId: workerId,
+          date: formattedDate,
+          amount: worker.dailyWage,
+          note: `Daily wage for attendance on ${format(selectedDate, 'PPP')}`,
+        };
+        // Add payment only if it doesn't exist for that day for that worker
+        setPayments(prev => prev.find(p => p.id === newPayment.id) ? prev : [newPayment, ...prev]);
+      }
+    } else if (status === 'absent') {
+      // Remove payment if worker is marked absent
+      const paymentIdToRemove = `p-att-${formattedDate}-${workerId}`;
+      setPayments(prev => prev.filter(p => p.id !== paymentIdToRemove));
+    }
+
     toast({
       title: `Marked ${status}`,
       description: `${workers.find(w => w.id === workerId)?.name} marked as ${status}.`
@@ -147,6 +174,7 @@ export default function AttendanceSheet() {
                   selected={selectedDate}
                   onSelect={(date) => date && setSelectedDate(date)}
                   initialFocus
+                  disabled={(date) => date > new Date()}
                 />
               </PopoverContent>
             </Popover>
@@ -201,7 +229,9 @@ export default function AttendanceSheet() {
                         </div>
                       )}
                       {record?.status === 'absent' && (
-                        <div className="text-red-500 font-medium text-sm">{t('attendance.status.absent')}</div>
+                         <Button onClick={() => handleAttendance(worker.id, 'present')} className="bg-green-600 hover:bg-green-700 text-white">
+                            <LogIn className="mr-2 h-4 w-4" />{t('attendance.mark.present')}
+                        </Button>
                       )}
                       <Button variant="ghost" size="sm" className="ml-2" onClick={() => setHistoryWorker(worker)}>
                         <History className="mr-2 h-4 w-4" />
