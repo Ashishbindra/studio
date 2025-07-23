@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Worker, Attendance, Payment } from '@/lib/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { attendances as initialAttendances } from '@/lib/data';
+import { useMemo } from 'react';
 
 interface PaymentListProps {
   workers: Worker[];
@@ -20,18 +20,18 @@ interface PaymentListProps {
   payments: Payment[];
 }
 
-export default function PaymentList({ workers, payments }: PaymentListProps) {
+export default function PaymentList({ workers, attendances, payments }: PaymentListProps) {
   const { t } = useLanguage();
 
-  const paymentData = workers.map(worker => {
-    const workerAttendances = initialAttendances.filter(a => a.workerId === worker.id);
+  const paymentData = useMemo(() => workers.map(worker => {
+    const workerAttendances = attendances.filter(a => a.workerId === worker.id);
     const workerPayments = payments.filter(p => p.workerId === worker.id);
     const presentDays = workerAttendances.filter(a => a.status === 'present').length;
     const totalDue = presentDays * worker.dailyWage;
     const totalPaid = workerPayments.reduce((sum, p) => sum + p.amount, 0);
     const balance = totalPaid - totalDue;
     return { ...worker, totalDue, totalPaid, balance };
-  });
+  }), [workers, attendances, payments]);
 
   return (
     <div className="rounded-lg border">

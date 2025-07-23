@@ -19,10 +19,37 @@ type DailyAttendance = Pick<Attendance, 'status' | 'checkIn' | 'checkOut'>;
 export default function AttendanceSheet() {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const [workers] = useState<Worker[]>(initialWorkers);
+  const [workers, setWorkers] = useState<Worker[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [allAttendance, setAllAttendance] = useState<Record<string, Record<string, DailyAttendance>>>({});
   const [historyWorker, setHistoryWorker] = useState<Worker | null>(null);
+
+  useEffect(() => {
+    const savedWorkers = localStorage.getItem('workers');
+    if (savedWorkers) {
+        setWorkers(JSON.parse(savedWorkers));
+    } else {
+        setWorkers(initialWorkers);
+    }
+
+    const savedAttendance = localStorage.getItem('allAttendance');
+    if (savedAttendance) {
+        const parsedAttendance = JSON.parse(savedAttendance);
+        // Date objects need to be reconstructed
+        Object.keys(parsedAttendance).forEach(date => {
+            Object.keys(parsedAttendance[date]).forEach(workerId => {
+                const record = parsedAttendance[date][workerId];
+                if (record.checkIn) record.checkIn = new Date(record.checkIn);
+                if (record.checkOut) record.checkOut = new Date(record.checkOut);
+            });
+        });
+        setAllAttendance(parsedAttendance);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('allAttendance', JSON.stringify(allAttendance));
+  }, [allAttendance]);
 
   const formattedDate = format(selectedDate, 'yyyy-MM-dd');
   const attendanceForSelectedDate = allAttendance[formattedDate] || {};
@@ -49,11 +76,6 @@ export default function AttendanceSheet() {
     return Array.from(uniqueAttendances.values());
 
   }, [allAttendance]);
-
-  useEffect(() => {
-    // In a real app, you would fetch attendance data for the visible month
-    // For this prototype, we'll just manage it in state.
-  }, [selectedDate]);
 
   const handleAttendance = (workerId: string, status: 'present' | 'absent') => {
     setAllAttendance(prev => {
@@ -161,7 +183,7 @@ export default function AttendanceSheet() {
                         <div className="flex flex-col md:flex-row md:items-center gap-4 text-sm">
                            <div className="flex items-center gap-2 text-green-600">
                               <Clock className="h-4 w-4" />
-                              <span>{t('attendance.checked.in.at')} {format(record.checkIn!, 'p')}</span>
+                              <span>{t('attendance.checked.in.at')} {record.checkIn ? format(record.checkIn, 'p') : ''}</span>
                           </div>
                           {record.checkOut ? (
                                <div className="flex items-center gap-2 text-red-500">

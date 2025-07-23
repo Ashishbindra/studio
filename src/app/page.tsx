@@ -3,7 +3,7 @@ import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import WorkerList from '@/components/workers/WorkerList';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AddWorkerDialog from '@/components/workers/AddWorkerDialog';
 import type { Worker } from '@/lib/types';
 import { workers as initialWorkers } from '@/lib/data';
@@ -14,9 +14,24 @@ export default function DashboardPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [isWorkerDialogOpen, setIsWorkerDialogOpen] = useState(false);
-  const [workers, setWorkers] = useState<Worker[]>(initialWorkers);
+  const [workers, setWorkers] = useState<Worker[]>([]);
   const [workerToDelete, setWorkerToDelete] = useState<Worker | null>(null);
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
+
+  useEffect(() => {
+    const savedWorkers = localStorage.getItem('workers');
+    if (savedWorkers) {
+      setWorkers(JSON.parse(savedWorkers));
+    } else {
+      setWorkers(initialWorkers);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (workers.length > 0) {
+        localStorage.setItem('workers', JSON.stringify(workers));
+    }
+  }, [workers]);
 
   const handleAddOrEditWorker = (workerData: Omit<Worker, 'id' | 'photoUrl' | 'dailyWage'> & { photoUrl?: string }) => {
     if (workerToEdit) {
@@ -33,7 +48,7 @@ export default function DashboardPage() {
       // Adding new worker
       const newWorker: Worker = {
         ...workerData,
-        id: `w${workers.length + 1}`,
+        id: `w${Date.now()}`,
         photoUrl: workerData.photoUrl || `https://placehold.co/100x100.png`,
         dailyWage: 500, // Assign a default daily wage
       };

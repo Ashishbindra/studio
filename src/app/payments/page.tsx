@@ -1,6 +1,5 @@
-
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import PaymentList from '@/components/payments/PaymentList';
 import { workers as initialWorkers } from '@/lib/data';
@@ -9,19 +8,58 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import AddPaymentDialog from '@/components/payments/AddPaymentDialog';
 import { useToast } from '@/hooks/use-toast';
+import { attendances as initialAttendances, payments as initialPayments } from '@/lib/data';
 
 export default function PaymentsPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const [workers] = useState<Worker[]>(initialWorkers);
+  const [workers, setWorkers] = useState<Worker[]>([]);
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
 
+  useEffect(() => {
+    const savedWorkers = localStorage.getItem('workers');
+    setWorkers(savedWorkers ? JSON.parse(savedWorkers) : initialWorkers);
+
+    const savedAttendances = localStorage.getItem('allAttendance');
+    const allAttendances: Record<string, Record<string, any>> = savedAttendances ? JSON.parse(savedAttendances) : {};
+    
+    const combinedAttendances: Attendance[] = [...initialAttendances];
+    const newAttendances: Attendance[] = [];
+    Object.entries(allAttendances).forEach(([date, dateRecords]) => {
+      Object.entries(dateRecords).forEach(([workerId, record]) => {
+        newAttendances.push({
+          id: `att-${date}-${workerId}`,
+          workerId,
+          date,
+          status: record.status,
+          checkIn: record.checkIn ? new Date(record.checkIn) : undefined,
+          checkOut: record.checkOut ? new Date(record.checkOut) : undefined,
+        });
+      });
+    });
+
+    const uniqueAttendances = new Map<string, Attendance>();
+    initialAttendances.forEach(att => uniqueAttendances.set(`${att.date}-${att.workerId}`, att));
+    newAttendances.forEach(att => uniqueAttendances.set(`${att.date}-${att.workerId}`, att));
+
+    setAttendances(Array.from(uniqueAttendances.values()));
+
+
+    const savedPayments = localStorage.getItem('payments');
+    setPayments(savedPayments ? JSON.parse(savedPayments) : initialPayments);
+
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('payments', JSON.stringify(payments));
+  }, [payments]);
+
   const handleAddPayment = (paymentData: Omit<Payment, 'id' | 'date'>) => {
     const newPayment: Payment = {
       ...paymentData,
-      id: `p${payments.length + 1}`,
+      id: `p${Date.now()}`,
       date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
     };
     setPayments(prev => [...prev, newPayment]);
