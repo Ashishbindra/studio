@@ -28,7 +28,7 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (workers.length > 0) {
+    if (workers.length > 0 || localStorage.getItem('workers')) {
         localStorage.setItem('workers', JSON.stringify(workers));
     }
   }, [workers]);

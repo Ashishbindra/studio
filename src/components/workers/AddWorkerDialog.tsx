@@ -56,6 +56,12 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
     }
   }, [isOpen, workerToEdit, setValue, reset]);
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      reset();
+    }
+    onOpenChange(open);
+  };
 
   const onSubmit = (data: WorkerFormData) => {
     onSaveWorker(data);
@@ -66,7 +72,7 @@ export default function AddWorkerDialog({ isOpen, onOpenChange, onSaveWorker, wo
   const isEditing = !!workerToEdit;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="font-headline">
