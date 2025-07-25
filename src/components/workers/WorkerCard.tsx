@@ -24,44 +24,44 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
   const hasAttendance = attendances.length > 0;
 
   return (
-    <Card className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <CardHeader className="flex flex-row items-center gap-4 p-4">
+    <Card className="flex flex-col overflow-hidden transition-shadow duration-300 rounded-lg shadow-md hover:shadow-lg">
+      <CardHeader className="flex flex-row items-start gap-4 p-4 bg-card/50">
         <Image
           src={worker.photoUrl}
           alt={worker.name}
-          width={80}
-          height={80}
-          className="rounded-full border-2 border-primary/50 object-cover"
+          width={64}
+          height={64}
+          className="rounded-full border-2 border-primary/20 object-cover"
           data-ai-hint={(worker as any).dataAiHint || 'person'}
         />
         <div className="flex-1">
-          <CardTitle className="font-headline text-xl">{worker.name}</CardTitle>
+          <CardTitle className="text-lg font-semibold">{worker.name}</CardTitle>
           <p className="text-sm text-muted-foreground">₹{worker.dailyWage} {t('worker.wage.per.day')}</p>
+           {worker.createdAt && (
+             <div className="flex items-center text-xs text-muted-foreground mt-2">
+                <Calendar className="h-3 w-3 mr-1.5" />
+                Joined on {format(new Date(worker.createdAt), 'do MMM yyyy')}
+            </div>
+           )}
         </div>
       </CardHeader>
-      <CardContent className="flex-grow p-4 pt-0">
-        {worker.createdAt && (
-         <div className="flex items-center text-xs text-muted-foreground mb-2">
-            <Calendar className="h-3 w-3 mr-1.5" />
-            Joined on {format(new Date(worker.createdAt), 'do MMM yyyy')}
-        </div>
-        )}
-        <div className="grid grid-cols-2 gap-2 text-center text-sm">
+      <CardContent className="flex-grow p-4 pt-2">
+        <div className="grid grid-cols-2 gap-4 text-center text-sm">
           <div>
-            <p className="text-muted-foreground">{t('status.present')}</p>
-            <p className="font-semibold text-lg text-green-600">{presentDays}</p>
+            <p className="font-semibold text-2xl text-green-600">{presentDays}</p>
+            <p className="text-muted-foreground text-xs uppercase tracking-wider">{t('status.present')}</p>
           </div>
           <div>
-            <p className="text-muted-foreground">{t('attendance.status.absent')}</p>
-            <p className="font-semibold text-lg text-red-500">{absentDays}</p>
+            <p className="font-semibold text-2xl text-red-500">{absentDays}</p>
+            <p className="text-muted-foreground text-xs uppercase tracking-wider">{t('attendance.status.absent')}</p>
           </div>
         </div>
       </CardContent>
-       <CardFooter className="p-2 bg-card/50">
-        <div className="flex w-full justify-end gap-2">
+       <CardFooter className="p-2 border-t">
+        <div className="flex w-full justify-end gap-1">
             <Button variant="ghost" size="sm" onClick={() => onEdit(worker)}>
-                <Pencil className="mr-2 h-4 w-4"/>
-                {t('dashboard.edit.worker')}
+                <Pencil className="h-4 w-4"/>
+                <span className="sr-only">Edit</span>
             </Button>
             <TooltipProvider>
                 <Tooltip>
@@ -74,8 +74,8 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
                                 onClick={() => onDelete(worker)}
                                 disabled={hasAttendance}
                             >
-                                <Trash2 className="mr-2 h-4 w-4"/>
-                                {t('dashboard.delete.worker')}
+                                <Trash2 className="h-4 w-4"/>
+                                <span className="sr-only">Delete</span>
                             </Button>
                         </div>
                     </TooltipTrigger>
