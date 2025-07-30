@@ -10,8 +10,6 @@ declare global {
 interface AdBannerProps {
   adSlot: string;
   adFormat?: string;
-  adLayout?: string;
-  adLayoutKey?: string;
   style?: React.CSSProperties;
   className?: string;
 }
@@ -19,8 +17,6 @@ interface AdBannerProps {
 const AdBanner: React.FC<AdBannerProps> = ({
   adSlot,
   adFormat = 'auto',
-  adLayout,
-  adLayoutKey,
   style = { display: 'block' },
   className,
 }) => {
@@ -28,20 +24,18 @@ const AdBanner: React.FC<AdBannerProps> = ({
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (err) {
-      console.error(err);
+      console.error("Ad push error:", err);
     }
-  }, []);
+  }, [adSlot]); // Re-run if adSlot changes
 
   return (
-    <div className={className} key={adSlot}>
+    <div className={className} style={{ overflow: 'hidden' }}>
       <ins
         className="adsbygoogle"
         style={style}
         data-ad-client="ca-app-pub-3386995525015386"
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
-        data-ad-layout={adLayout}
-        data-ad-layout-key={adLayoutKey}
         data-full-width-responsive="true"
       ></ins>
     </div>
