@@ -9,6 +9,7 @@ import AddWorkerDialog from '@/components/workers/AddWorkerDialog';
 import type { Worker } from '@/lib/types';
 import DeleteWorkerDialog from '@/components/workers/DeleteWorkerDialog';
 import { useToast } from '@/hooks/use-toast';
+import AdBanner from '@/components/AdBanner';
 
 export default function DashboardPage() {
   const { t } = useLanguage();
@@ -105,6 +106,10 @@ export default function DashboardPage() {
 
       <WorkerList workers={workers} onEdit={handleOpenEditDialog} onDelete={handleDeleteRequest} />
       
+      <div className="mt-8">
+        <AdBanner adSlot="5544315530" />
+      </div>
+
       <AddWorkerDialog
         isOpen={isWorkerDialogOpen}
         onOpenChange={setIsWorkerDialogOpen}
