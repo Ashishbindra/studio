@@ -29,7 +29,7 @@ const AdBanner: React.FC<AdBannerProps> = ({
   }, [adSlot]); // Re-run if adSlot changes
 
   return (
-    <div className={className} style={{ overflow: 'hidden' }}>
+    <div key={adSlot} className={className} style={{ overflow: 'hidden' }}>
       <ins
         className="adsbygoogle"
         style={style}
