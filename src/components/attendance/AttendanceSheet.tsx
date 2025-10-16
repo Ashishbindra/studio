@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import HistorySheet from '@/components/attendance/HistorySheet';
 
 type DailyAttendance = Pick<Attendance, 'status' | 'checkIn' | 'checkOut'>;
+type AttendanceStatus = 'present' | 'absent' | 'half-day';
 
 export default function AttendanceSheet() {
   const { t } = useLanguage();
@@ -89,13 +90,13 @@ export default function AttendanceSheet() {
     return newAttendances;
   }, [allAttendance]);
 
-  const handleAttendance = (workerId: string, status: 'present' | 'absent') => {
+  const handleAttendance = (workerId: string, status: AttendanceStatus) => {
     setAllAttendance(prev => {
       const newDateRecords = { ...prev[formattedDate] };
       
       const newRecord: DailyAttendance = {
         status,
-        checkIn: status === 'present' ? new Date() : undefined,
+        checkIn: status !== 'absent' ? new Date() : undefined,
       };
 
       newDateRecords[workerId] = newRecord;
@@ -109,23 +110,20 @@ export default function AttendanceSheet() {
     const worker = workers.find(w => w.id === workerId);
     if (!worker) return;
 
-    if (status === 'present') {
+    // First, remove any existing payment for that day to avoid duplicates
+    const paymentIdToRemove = `p-att-${formattedDate}-${workerId}`;
+    setPayments(prev => prev.filter(p => p.id !== paymentIdToRemove));
+
+    if (status === 'present' || status === 'half-day') {
+        const amount = status === 'present' ? worker.dailyWage : worker.dailyWage / 2;
         const newPayment: Payment = {
           id: `p-att-${formattedDate}-${workerId}`,
           workerId: workerId,
           date: formattedDate,
-          amount: worker.dailyWage,
-          note: `Daily wage for attendance on ${format(selectedDate, 'PPP')}`,
+          amount,
+          note: `Wage for ${status} day on ${format(selectedDate, 'PPP')}`,
         };
-        setPayments(prev => {
-            if (prev.find(p => p.id === newPayment.id)) {
-                return prev;
-            }
-            return [newPayment, ...prev];
-        });
-    } else if (status === 'absent') {
-      const paymentIdToRemove = `p-att-${formattedDate}-${workerId}`;
-      setPayments(prev => prev.filter(p => p.id !== paymentIdToRemove));
+        setPayments(prev => [newPayment, ...prev]);
     }
 
     toast({
@@ -210,33 +208,39 @@ export default function AttendanceSheet() {
                           <Button onClick={() => handleAttendance(worker.id, 'present')} className="bg-green-600 hover:bg-green-700 text-white flex-1">
                             <LogIn className="mr-2 h-4 w-4" />{t('attendance.mark.present')}
                           </Button>
+                          <Button onClick={() => handleAttendance(worker.id, 'half-day')} className="bg-yellow-500 hover:bg-yellow-600 text-white flex-1">
+                            {t('attendance.status.half-day')}
+                          </Button>
                           <Button onClick={() => handleAttendance(worker.id, 'absent')} variant="destructive" className="flex-1">
                             <LogOut className="mr-2 h-4 w-4" />{t('attendance.mark.absent')}
                           </Button>
                         </div>
                       )}
-                      {record?.status === 'present' && (
-                        <div className="flex flex-col md:flex-row md:items-center gap-4 text-sm w-full">
-                           <div className="flex items-center gap-2 text-green-600">
-                              <Clock className="h-4 w-4" />
-                              <span>{t('attendance.checked.in.at')} {record.checkIn ? format(record.checkIn, 'p') : ''}</span>
-                          </div>
-                          {record.checkOut ? (
-                               <div className="flex items-center gap-2 text-red-500">
+                      {record && (
+                        <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
+                          { record.status === 'absent' ?
+                           <Button onClick={() => handleAttendance(worker.id, 'present')} className="bg-green-600 hover:bg-green-700 text-white w-full">
+                              <LogIn className="mr-2 h-4 w-4" />{t('attendance.mark.present')}
+                          </Button> :
+                          (
+                            <div className="flex flex-col md:flex-row md:items-center gap-4 text-sm w-full">
+                               <div className="flex items-center gap-2 text-green-600">
                                   <Clock className="h-4 w-4" />
-                                  <span>{t('attendance.checked.out.at')} {format(record.checkOut, 'p')}</span>
+                                  <span>{t('attendance.checked.in.at')} {record.checkIn ? format(record.checkIn, 'p') : ''}</span>
                               </div>
-                          ) : (
-                              <Button onClick={() => handleCheckOut(worker.id)} size="sm" variant="outline" className="w-full sm:w-auto">
-                                  <LogOut className="mr-2 h-4 w-4" />{t('attendance.check.out')}
-                              </Button>
+                              {record.checkOut ? (
+                                   <div className="flex items-center gap-2 text-red-500">
+                                      <Clock className="h-4 w-4" />
+                                      <span>{t('attendance.checked.out.at')} {format(record.checkOut, 'p')}</span>
+                                  </div>
+                              ) : (
+                                  <Button onClick={() => handleCheckOut(worker.id)} size="sm" variant="outline" className="w-full sm:w-auto">
+                                      <LogOut className="mr-2 h-4 w-4" />{t('attendance.check.out')}
+                                  </Button>
+                              )}
+                            </div>
                           )}
                         </div>
-                      )}
-                      {record?.status === 'absent' && (
-                         <Button onClick={() => handleAttendance(worker.id, 'present')} className="bg-green-600 hover:bg-green-700 text-white w-full">
-                            <LogIn className="mr-2 h-4 w-4" />{t('attendance.mark.present')}
-                        </Button>
                       )}
                       <Button variant="ghost" size="sm" className="ml-0 mt-2 sm:mt-0 sm:ml-2 w-full sm:w-auto" onClick={() => setHistoryWorker(worker)}>
                         <History className="mr-2 h-4 w-4" />

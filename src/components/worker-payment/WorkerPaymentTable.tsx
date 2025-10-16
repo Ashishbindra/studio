@@ -23,9 +23,11 @@ export default function WorkerPaymentTable({ workers, payments, attendances }: W
   const { t } = useLanguage();
 
   const paymentSummary = workers.map(worker => {
-    const workerAttendances = attendances.filter(a => a.workerId === worker.id && a.status === 'present');
-    const presentDays = workerAttendances.length;
-    const totalEarned = presentDays * worker.dailyWage;
+    const workerAttendances = attendances.filter(a => a.workerId === worker.id);
+    const presentDays = workerAttendances.filter(a => a.status === 'present').length;
+    const halfDays = workerAttendances.filter(a => a.status === 'half-day').length;
+
+    const totalEarned = (presentDays * worker.dailyWage) + (halfDays * worker.dailyWage / 2);
 
     const workerPayments = payments.filter(p => p.workerId === worker.id);
     const totalPaid = workerPayments.reduce((sum, p) => sum + p.amount, 0);
@@ -35,6 +37,7 @@ export default function WorkerPaymentTable({ workers, payments, attendances }: W
     return {
       ...worker,
       presentDays,
+      halfDays,
       totalEarned,
       totalPaid,
       balance,
@@ -52,6 +55,7 @@ export default function WorkerPaymentTable({ workers, payments, attendances }: W
           <TableRow>
             <TableHead>{t('worker.payment.table.worker')}</TableHead>
             <TableHead className="text-center">{t('worker.payment.table.present.days')}</TableHead>
+            <TableHead className="text-center">{t('worker.payment.table.half.days')}</TableHead>
             <TableHead className="text-right">{t('worker.payment.table.total.earned')}</TableHead>
             <TableHead className="text-right">{t('worker.payment.table.total.paid')}</TableHead>
             <TableHead className="text-right">{t('worker.payment.table.balance')}</TableHead>
@@ -72,6 +76,7 @@ export default function WorkerPaymentTable({ workers, payments, attendances }: W
                 {summary.name}
               </TableCell>
               <TableCell className="text-center">{summary.presentDays}</TableCell>
+              <TableCell className="text-center">{summary.halfDays}</TableCell>
               <TableCell className="text-right">₹{summary.totalEarned.toLocaleString()}</TableCell>
               <TableCell className="text-right">₹{summary.totalPaid.toLocaleString()}</TableCell>
               <TableCell className="text-right font-semibold">

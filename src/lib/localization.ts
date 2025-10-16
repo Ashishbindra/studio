@@ -48,6 +48,7 @@ export const uiContent = {
   'attendance.check.in': 'Check-in',
   'attendance.check.out': 'Check-out',
   'attendance.status.absent': 'Absent',
+  'attendance.status.half-day': 'Half Day',
   'attendance.not.marked': 'Not Marked',
   'status.present': 'Present',
 
@@ -63,6 +64,7 @@ export const uiContent = {
   'worker.payment.title': 'Worker Payment Summary',
   'worker.payment.table.worker': 'Worker',
   'worker.payment.table.present.days': 'Present Days',
+  'worker.payment.table.half.days': 'Half Days',
   'worker.payment.table.total.earned': 'Total Earned',
   'worker.payment.table.total.paid': 'Total Paid',
   'worker.payment.table.balance': 'Balance',

@@ -20,6 +20,7 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
   const { t } = useLanguage();
 
   const presentDays = attendances.filter(a => a.status === 'present').length;
+  const halfDays = attendances.filter(a => a.status === 'half-day').length;
   const absentDays = attendances.filter(a => a.status === 'absent').length;
   const hasAttendance = attendances.length > 0;
 
@@ -46,10 +47,14 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-4 pt-2">
-        <div className="grid grid-cols-2 gap-4 text-center text-sm">
+        <div className="grid grid-cols-3 gap-2 text-center text-sm">
           <div>
             <p className="font-semibold text-2xl text-green-600">{presentDays}</p>
             <p className="text-muted-foreground text-xs uppercase tracking-wider">{t('status.present')}</p>
+          </div>
+          <div>
+            <p className="font-semibold text-2xl text-yellow-500">{halfDays}</p>
+            <p className="text-muted-foreground text-xs uppercase tracking-wider">{t('attendance.status.half-day')}</p>
           </div>
           <div>
             <p className="font-semibold text-2xl text-red-500">{absentDays}</p>

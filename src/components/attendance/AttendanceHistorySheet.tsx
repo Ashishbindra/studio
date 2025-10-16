@@ -23,6 +23,15 @@ export default function AttendanceHistorySheet({ attendances }: AttendanceHistor
   if (attendances.length === 0) {
     return <p className="text-center text-muted-foreground p-4">No attendance records found for this worker.</p>;
   }
+  
+  const getStatusKey = (status: 'present' | 'absent' | 'half-day'): 'status.present' | 'attendance.status.absent' | 'attendance.status.half-day' => {
+    switch (status) {
+        case 'present': return 'status.present';
+        case 'absent': return 'attendance.status.absent';
+        case 'half-day': return 'attendance.status.half-day';
+    }
+  }
+
 
   return (
     <div className="rounded-lg border">
@@ -43,10 +52,11 @@ export default function AttendanceHistorySheet({ attendances }: AttendanceHistor
                 <Badge 
                   className={cn({
                     'bg-green-600': record.status === 'present',
-                    'bg-red-600': record.status === 'absent'
+                    'bg-red-600': record.status === 'absent',
+                    'bg-yellow-500': record.status === 'half-day',
                   })}
                 >
-                  {t(record.status === 'present' ? 'status.present' : 'attendance.status.absent')}
+                  {t(getStatusKey(record.status))}
                 </Badge>
               </TableCell>
               <TableCell>{record.checkIn ? format(new Date(record.checkIn), 'p') : 'N/A'}</TableCell>

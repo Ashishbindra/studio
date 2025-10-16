@@ -11,7 +11,7 @@ export interface Attendance {
   id: string;
   workerId: string;
   date: string; // YYYY-MM-DD
-  status: 'present' | 'absent';
+  status: 'present' | 'absent' | 'half-day';
   checkIn?: Date;
   checkOut?: Date;
 }
