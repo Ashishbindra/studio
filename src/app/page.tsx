@@ -1,34 +1,60 @@
 
 'use client';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Users, Wallet, Landmark, PiggyBank } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import WorkerList from '@/components/workers/WorkerList';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import AddWorkerDialog from '@/components/workers/AddWorkerDialog';
-import type { Worker } from '@/lib/types';
+import type { Worker, Payment, Attendance } from '@/lib/types';
 import DeleteWorkerDialog from '@/components/workers/DeleteWorkerDialog';
 import { useToast } from '@/hooks/use-toast';
 import AdBanner from '@/components/AdBanner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { format } from 'date-fns';
 
 export default function DashboardPage() {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [isWorkerDialogOpen, setIsWorkerDialogOpen] = useState(false);
   const [workers, setWorkers] = useState<Worker[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [workerToDelete, setWorkerToDelete] = useState<Worker | null>(null);
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
   const isInitialMount = useRef(true);
   
-  // Load workers from localStorage on initial mount
+  // Load data from localStorage on initial mount
   useEffect(() => {
     try {
       const savedWorkers = localStorage.getItem('workers');
       if (savedWorkers) {
         setWorkers(JSON.parse(savedWorkers));
       }
+      const savedPayments = localStorage.getItem('payments');
+      if (savedPayments) {
+        setPayments(JSON.parse(savedPayments));
+      }
+      const savedAttendances = localStorage.getItem('allAttendance');
+      if(savedAttendances) {
+          const parsedAttendance = JSON.parse(savedAttendances);
+          const newAttendances: Attendance[] = [];
+          Object.entries(parsedAttendance).forEach(([date, dateRecords]) => {
+              Object.entries(dateRecords as any).forEach(([workerId, record]) => {
+                  newAttendances.push({
+                      id: `att-${date}-${workerId}`,
+                      workerId,
+                      date,
+                      status: (record as any).status,
+                      checkIn: (record as any).checkIn ? new Date((record as any).checkIn) : undefined,
+                      checkOut: (record as any).checkOut ? new Date((record as any).checkOut) : undefined,
+                  });
+              });
+          });
+          setAttendances(newAttendances);
+      }
     } catch (error) {
-      console.error("Failed to parse workers from localStorage", error);
+      console.error("Failed to parse data from localStorage", error);
     }
   }, []);
 
@@ -44,6 +70,43 @@ export default function DashboardPage() {
       console.error("Failed to save workers to localStorage", error);
     }
   }, [workers]);
+
+  const summaryStats = useMemo(() => {
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+
+    const totalEarnedToday = workers.reduce((total, worker) => {
+        const attendanceToday = attendances.find(a => a.workerId === worker.id && a.date === todayStr);
+        if (attendanceToday) {
+            if (attendanceToday.status === 'present') {
+                return total + worker.dailyWage;
+            }
+            if (attendanceToday.status === 'half-day') {
+                return total + worker.dailyWage / 2;
+            }
+        }
+        return total;
+    }, 0);
+    
+    const totalPaidToday = payments.filter(p => p.date === todayStr).reduce((sum, p) => sum + p.amount, 0);
+
+    const totalEarned = workers.reduce((acc, worker) => {
+        const workerAttendances = attendances.filter(a => a.workerId === worker.id);
+        const presentDays = workerAttendances.filter(a => a.status === 'present').length;
+        const halfDays = workerAttendances.filter(a => a.status === 'half-day').length;
+        return acc + (presentDays * worker.dailyWage) + (halfDays * worker.dailyWage / 2);
+    }, 0);
+
+    const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+    const totalDue = totalEarned - totalPaid;
+
+    return {
+        totalWorkers: workers.length,
+        totalEarnedToday,
+        totalPaidToday,
+        totalDue
+    };
+  }, [workers, attendances, payments]);
+
 
   const handleAddOrEditWorker = (workerData: Omit<Worker, 'id' | 'createdAt'>) => {
     if (workerToEdit) {
@@ -108,6 +171,48 @@ export default function DashboardPage() {
           {t('dashboard.add.worker')}
         </Button>
       </div>
+
+       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Workers</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summaryStats.totalWorkers}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Earned Today</CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{summaryStats.totalEarnedToday.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Paid Today</CardTitle>
+            <Landmark className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{summaryStats.totalPaidToday.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Balance Due</CardTitle>
+            <PiggyBank className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${summaryStats.totalDue >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+              ₹{Math.abs(summaryStats.totalDue).toLocaleString()}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
 
       <WorkerList workers={workers} onEdit={handleOpenEditDialog} onDelete={handleDeleteRequest} />
       
