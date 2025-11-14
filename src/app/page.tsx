@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import AdBanner from '@/components/AdBanner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 export default function DashboardPage() {
   const { t } = useLanguage();
@@ -120,8 +121,10 @@ export default function DashboardPage() {
         description: t('toast.worker.updated.description').replace('{workerName}', workerData.name),
       });
     } else {
+      const randomImage = placeholderImages[Math.floor(Math.random() * placeholderImages.length)];
       const newWorker: Worker = {
         ...workerData,
+        photoUrl: workerData.photoUrl || randomImage.url,
         id: `w${Date.now()}`,
         createdAt: new Date().toISOString(),
       };
