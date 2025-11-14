@@ -16,6 +16,7 @@ export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   
+  // Load data from localStorage on initial mount
   useEffect(() => {
     try {
       const savedWorkers = localStorage.getItem('workers');
@@ -32,11 +33,15 @@ export default function PaymentsPage() {
     }
   }, []);
 
+  // Save payments to localStorage whenever the payments state changes, but only if it's not the initial empty state.
   useEffect(() => {
-    try {
-      localStorage.setItem('payments', JSON.stringify(payments));
-    } catch (error) {
-      console.error("Failed to save payments to localStorage", error);
+    // This check prevents overwriting stored data with an empty array on initial load
+    if (payments.length > 0) {
+      try {
+        localStorage.setItem('payments', JSON.stringify(payments));
+      } catch (error) {
+        console.error("Failed to save payments to localStorage", error);
+      }
     }
   }, [payments]);
 
