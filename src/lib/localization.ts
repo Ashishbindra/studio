@@ -1,3 +1,4 @@
+
 export const uiContent = {
   // Header
   'app.title': 'Shramik Hisab',
@@ -37,6 +38,10 @@ export const uiContent = {
   'dialog.delete.worker.title': 'Are you sure you want to delete this worker?',
   'dialog.delete.worker.description_p1': 'This will permanently delete the record for',
   'dialog.delete.worker.description_p2': 'This action cannot be undone.',
+  
+  // Delete Payment Dialog
+  'dialog.delete.payment.title': 'Are you sure you want to delete this payment?',
+  'dialog.delete.payment.description': 'This will permanently delete the payment record of ₹{amount} for {workerName}. This action cannot be undone.',
 
   // Attendance Page
   'attendance.title': 'Daily Attendance',
@@ -47,6 +52,7 @@ export const uiContent = {
   'attendance.checked.out.at': 'Checked out at',
   'attendance.check.in': 'Check-in',
   'attendance.check.out': 'Check-out',
+  'attendance.status.present': 'Present',
   'attendance.status.absent': 'Absent',
   'attendance.status.half-day': 'Half Day',
   'attendance.not.marked': 'Not Marked',
@@ -69,9 +75,11 @@ export const uiContent = {
   'worker.payment.table.total.paid': 'Total Paid',
   'worker.payment.table.balance': 'Balance',
 
-  // Add Payment Dialog
+  // Add/Edit Payment Dialog
   'dialog.record.payment.title': 'Record a Payment',
   'dialog.record.payment.description': "Select a worker and enter the amount paid.",
+  'dialog.edit.payment.title': 'Edit Payment',
+  'dialog.edit.payment.description': "Update the details of this payment record.",
   'form.worker.label': 'Worker',
   'form.worker.placeholder': 'Select a worker',
   'form.payment.amount.label': 'Amount',
@@ -87,14 +95,16 @@ export const uiContent = {
   'toast.worker.updated.description': "{workerName}'s details have been updated.",
   'toast.worker.deleted.title': 'Worker Deleted',
   'toast.worker.deleted.description': '{workerName} has been removed.',
-  'toast.attendance.marked.present.title': 'Marked Present',
-  'toast.attendance.marked.present.description': '{workerName} marked as present.',
-  'toast.attendance.marked.absent.title': 'Marked Absent',
-  'toast.attendance.marked.absent.description': '{workerName} marked as absent.',
+  'toast.attendance.updated.title': 'Attendance Updated',
+  'toast.attendance.updated.description': '{workerName} marked as {status}.',
   'toast.attendance.checked.out.title': 'Checked Out',
   'toast.attendance.checked.out.description': '{workerName} has been checked out.',
   'toast.payment.recorded.title': 'Payment Recorded',
   'toast.payment.recorded.description': '₹{amount} paid to {workerName}.',
+  'toast.payment.updated.title': 'Payment Updated',
+  'toast.payment.updated.description': 'Payment of ₹{amount} for {workerName} has been updated.',
+  'toast.payment.deleted.title': 'Payment Deleted',
+  'toast.payment.deleted.description': 'Payment of ₹{amount} for {workerName} has been deleted.',
 };
 
 export type UIContentKeys = keyof typeof uiContent;

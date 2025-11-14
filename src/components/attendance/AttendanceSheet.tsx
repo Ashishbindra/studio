@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import type { Attendance, Worker, Payment } from '@/lib/types';
+import type { Attendance, Worker } from '@/lib/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import HistorySheet from '@/components/attendance/HistorySheet';
@@ -23,7 +23,6 @@ export default function AttendanceSheet() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [allAttendance, setAllAttendance] = useState<Record<string, Record<string, DailyAttendance>>>({});
-  const [payments, setPayments] = useState<Payment[]>([]);
   const [historyWorker, setHistoryWorker] = useState<Worker | null>(null);
 
   useEffect(() => {
@@ -44,10 +43,6 @@ export default function AttendanceSheet() {
         });
         setAllAttendance(parsedAttendance);
       }
-       const savedPayments = localStorage.getItem('payments');
-        if (savedPayments) {
-            setPayments(JSON.parse(savedPayments));
-        }
     } catch (error) {
       console.error("Failed to parse data from localStorage", error);
     }
@@ -60,15 +55,6 @@ export default function AttendanceSheet() {
       console.error("Failed to save attendance to localStorage", error);
     }
   }, [allAttendance]);
-
-  useEffect(() => {
-    try {
-        localStorage.setItem('payments', JSON.stringify(payments));
-    } catch (error) {
-        console.error("Failed to save payments to localStorage", error);
-    }
-  }, [payments]);
-
 
   const formattedDate = format(selectedDate, 'yyyy-MM-dd');
   const attendanceForSelectedDate = allAttendance[formattedDate] || {};
@@ -93,11 +79,18 @@ export default function AttendanceSheet() {
   const handleAttendance = (workerId: string, status: AttendanceStatus) => {
     setAllAttendance(prev => {
       const newDateRecords = { ...prev[formattedDate] };
+      const existingRecord = newDateRecords[workerId];
       
       const newRecord: DailyAttendance = {
         status,
-        checkIn: status !== 'absent' ? new Date() : undefined,
+        checkIn: (status !== 'absent' && !existingRecord?.checkIn) ? new Date() : existingRecord?.checkIn,
+        checkOut: existingRecord?.checkOut,
       };
+
+      if (status === 'absent') {
+          delete newRecord.checkIn;
+          delete newRecord.checkOut;
+      }
 
       newDateRecords[workerId] = newRecord;
 
@@ -110,25 +103,9 @@ export default function AttendanceSheet() {
     const worker = workers.find(w => w.id === workerId);
     if (!worker) return;
 
-    // First, remove any existing payment for that day to avoid duplicates
-    const paymentIdToRemove = `p-att-${formattedDate}-${workerId}`;
-    setPayments(prev => prev.filter(p => p.id !== paymentIdToRemove));
-
-    if (status === 'present' || status === 'half-day') {
-        const amount = status === 'present' ? worker.dailyWage : worker.dailyWage / 2;
-        const newPayment: Payment = {
-          id: `p-att-${formattedDate}-${workerId}`,
-          workerId: workerId,
-          date: formattedDate,
-          amount,
-          note: `Wage for ${status} day on ${format(selectedDate, 'PPP')}`,
-        };
-        setPayments(prev => [newPayment, ...prev]);
-    }
-
     toast({
-      title: `Marked ${status}`,
-      description: `${worker.name} marked as ${status}.`
+      title: t('toast.attendance.updated.title'),
+      description: t('toast.attendance.updated.description').replace('{workerName}', worker.name).replace('{status}', t(`attendance.status.${status}` as any))
     });
   };
 
@@ -240,6 +217,11 @@ export default function AttendanceSheet() {
                               )}
                             </div>
                           )}
+                           {record.status !== 'absent' && (
+                             <Button onClick={() => handleAttendance(worker.id, 'absent')} variant="destructive" size="sm" className="w-full sm:w-auto">
+                                <LogOut className="mr-2 h-4 w-4" />{t('attendance.mark.absent')}
+                             </Button>
+                           )}
                         </div>
                       )}
                       <Button variant="ghost" size="sm" className="ml-0 mt-2 sm:mt-0 sm:ml-2 w-full sm:w-auto" onClick={() => setHistoryWorker(worker)}>
