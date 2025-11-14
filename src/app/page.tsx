@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [workerToDelete, setWorkerToDelete] = useState<Worker | null>(null);
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
+  const isInitialMount = useRef(true);
   
   // Load workers from localStorage on initial mount
   useEffect(() => {
@@ -33,6 +34,10 @@ export default function DashboardPage() {
 
   // Save workers to localStorage whenever the workers state changes
   useEffect(() => {
+    if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+    }
     try {
       localStorage.setItem('workers', JSON.stringify(workers));
     } catch (error) {
