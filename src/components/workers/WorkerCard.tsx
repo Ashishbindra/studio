@@ -25,19 +25,19 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
   const hasAttendance = attendances.length > 0;
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-shadow duration-300 rounded-lg shadow-md hover:shadow-lg">
-      <CardHeader className="flex flex-row items-start gap-4 p-4 bg-card/50">
+    <Card className="flex flex-col overflow-hidden transition-all duration-300 rounded-lg bg-card/50 border-primary/20 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/50">
+      <CardHeader className="flex flex-row items-start gap-4 p-4">
         <Image
           src={worker.photoUrl}
           alt={worker.name}
           width={64}
           height={64}
-          className="rounded-full border-2 border-primary/20 object-cover"
+          className="rounded-full border-2 border-primary/50 object-cover"
           data-ai-hint={(worker as any).dataAiHint || 'person'}
         />
         <div className="flex-1">
-          <CardTitle className="text-lg font-semibold">{worker.name}</CardTitle>
-          <p className="text-sm text-muted-foreground">₹{worker.dailyWage} {t('worker.wage.per.day')}</p>
+          <CardTitle className="text-lg font-headline font-bold">{worker.name}</CardTitle>
+          <p className="text-sm text-primary/80">₹{worker.dailyWage} {t('worker.wage.per.day')}</p>
            {worker.createdAt && (
              <div className="flex items-center text-xs text-muted-foreground mt-2">
                 <Calendar className="h-3 w-3 mr-1.5" />
@@ -49,22 +49,22 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
       <CardContent className="flex-grow p-4 pt-2">
         <div className="grid grid-cols-3 gap-2 text-center text-sm">
           <div>
-            <p className="font-semibold text-2xl text-green-600">{presentDays}</p>
+            <p className="font-bold text-2xl text-green-400">{presentDays}</p>
             <p className="text-muted-foreground text-xs uppercase tracking-wider">{t('status.present')}</p>
           </div>
           <div>
-            <p className="font-semibold text-2xl text-yellow-500">{halfDays}</p>
+            <p className="font-bold text-2xl text-yellow-400">{halfDays}</p>
             <p className="text-muted-foreground text-xs uppercase tracking-wider">{t('attendance.status.half-day')}</p>
           </div>
           <div>
-            <p className="font-semibold text-2xl text-red-500">{absentDays}</p>
+            <p className="font-bold text-2xl text-red-500">{absentDays}</p>
             <p className="text-muted-foreground text-xs uppercase tracking-wider">{t('attendance.status.absent')}</p>
           </div>
         </div>
       </CardContent>
-       <CardFooter className="p-2 border-t">
+       <CardFooter className="p-2 border-t border-white/10">
         <div className="flex w-full justify-end gap-1">
-            <Button variant="ghost" size="sm" onClick={() => onEdit(worker)}>
+            <Button variant="ghost" size="sm" onClick={() => onEdit(worker)} className="hover:bg-primary/20 hover:text-primary">
                 <Pencil className="h-4 w-4"/>
                 <span className="sr-only">Edit</span>
             </Button>
@@ -75,7 +75,7 @@ export default function WorkerCard({ worker, attendances, onEdit, onDelete }: Wo
                              <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10" 
+                                className="text-red-500 hover:text-red-400 hover:bg-destructive/20" 
                                 onClick={() => onDelete(worker)}
                                 disabled={hasAttendance}
                             >

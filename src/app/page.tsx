@@ -169,7 +169,7 @@ export default function DashboardPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold font-headline">{t('dashboard.title')}</h1>
-        <Button onClick={handleOpenAddDialog} className="bg-accent hover:bg-accent/90">
+        <Button onClick={handleOpenAddDialog} className="bg-accent hover:bg-accent/90 text-accent-foreground">
           <PlusCircle className="mr-2 h-5 w-5" />
           {t('dashboard.add.worker')}
         </Button>
@@ -182,7 +182,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summaryStats.totalWorkers}</div>
+            <div className="text-2xl font-bold font-headline">{summaryStats.totalWorkers}</div>
           </CardContent>
         </Card>
         <Card>
@@ -191,7 +191,7 @@ export default function DashboardPage() {
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{summaryStats.totalEarnedToday.toLocaleString()}</div>
+            <div className="text-2xl font-bold font-headline">₹{summaryStats.totalEarnedToday.toLocaleString()}</div>
           </CardContent>
         </Card>
         <Card>
@@ -200,7 +200,7 @@ export default function DashboardPage() {
             <Landmark className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{summaryStats.totalPaidToday.toLocaleString()}</div>
+            <div className="text-2xl font-bold font-headline">₹{summaryStats.totalPaidToday.toLocaleString()}</div>
           </CardContent>
         </Card>
         <Card>
@@ -209,7 +209,7 @@ export default function DashboardPage() {
             <PiggyBank className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${summaryStats.totalDue >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+            <div className={`text-2xl font-bold font-headline ${summaryStats.totalDue >= 0 ? 'text-red-500' : 'text-green-500'}`}>
               ₹{Math.abs(summaryStats.totalDue).toLocaleString()}
             </div>
           </CardContent>
