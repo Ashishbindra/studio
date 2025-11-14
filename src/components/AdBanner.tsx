@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 
 declare global {
   interface Window {
@@ -20,16 +20,24 @@ const AdBanner: React.FC<AdBannerProps> = ({
   style = { display: 'block' },
   className,
 }) => {
+  const id = useId();
+
   useEffect(() => {
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (err) {
+      // This error is common in development and can be ignored.
+      if (process.env.NODE_ENV === 'development') {
+        console.warn("Ad push error ignored in development:", err);
+        return;
+      }
       console.error("Ad push error:", err);
     }
-  }, [adSlot]); // Re-run if adSlot changes
+  }, [adSlot, id]); 
 
+  // The key prop is essential here to ensure React creates a new element on re-render.
   return (
-    <div key={adSlot} className={className} style={{ overflow: 'hidden' }}>
+    <div className={className} style={{ overflow: 'hidden' }} key={id}>
       <ins
         className="adsbygoogle"
         style={style}
