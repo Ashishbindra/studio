@@ -24,6 +24,7 @@ export default function AttendanceSheet() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [allAttendance, setAllAttendance] = useState<Record<string, Record<string, DailyAttendance>>>({});
   const [historyWorker, setHistoryWorker] = useState<Worker | null>(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     try {
@@ -49,6 +50,10 @@ export default function AttendanceSheet() {
   }, []);
 
   useEffect(() => {
+    if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+    }
     try {
       localStorage.setItem('allAttendance', JSON.stringify(allAttendance));
     } catch (error) {
