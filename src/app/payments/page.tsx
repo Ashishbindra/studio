@@ -57,7 +57,7 @@ export default function PaymentsPage() {
     if (paymentToEdit) {
       setPayments(prevPayments => 
         prevPayments.map(p =>
-          p.id === paymentToEdit.id ? { ...p, ...paymentData } : p
+          p.id === paymentToEdit.id ? { ...paymentToEdit, ...paymentData, date: paymentData.date || paymentToEdit.date } : p
         )
       );
       toast({

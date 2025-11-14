@@ -28,7 +28,7 @@ import { format } from 'date-fns';
 interface AddPaymentDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSavePayment: (payment: Omit<Payment, 'id'>) => void;
+  onSavePayment: (payment: Omit<Payment, 'id' | 'date'> & { date: string }) => void;
   workers: Worker[];
   paymentToEdit: Payment | null;
 }
@@ -46,7 +46,7 @@ export default function AddPaymentDialog({ isOpen, onOpenChange, onSavePayment, 
   const { t } = useLanguage();
   const isEditing = !!paymentToEdit;
   
-  const { register, handleSubmit, formState: { errors }, reset, setValue, watch, control } = useForm<PaymentFormData>({
+  const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
   });
 
@@ -85,7 +85,7 @@ export default function AddPaymentDialog({ isOpen, onOpenChange, onSavePayment, 
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="workerId" className="text-right">{t('form.worker.label')}</Label>
               <div className="col-span-3">
-                <Select onValueChange={(value) => setValue('workerId', value)} value={workerId}>
+                <Select onValueChange={(value) => setValue('workerId', value, { shouldValidate: true })} value={workerId} disabled={isEditing}>
                     <SelectTrigger id="workerId">
                         <SelectValue placeholder={t('form.worker.placeholder')} />
                     </SelectTrigger>
@@ -125,7 +125,7 @@ export default function AddPaymentDialog({ isOpen, onOpenChange, onSavePayment, 
                         <Calendar
                         mode="single"
                         selected={date}
-                        onSelect={(d) => d && setValue('date', d)}
+                        onSelect={(d) => d && setValue('date', d, { shouldValidate: true })}
                         initialFocus
                         />
                     </PopoverContent>
