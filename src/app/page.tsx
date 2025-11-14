@@ -49,7 +49,7 @@ export default function DashboardPage() {
     if (workerToEdit) {
       setWorkers(prevWorkers => 
         prevWorkers.map(w =>
-          w.id === workerToEdit.id ? { ...workerToEdit, ...workerData } : w
+          w.id === workerToEdit.id ? { ...w, ...workerData } : w
         )
       );
       toast({
@@ -117,7 +117,10 @@ export default function DashboardPage() {
 
       <AddWorkerDialog
         isOpen={isWorkerDialogOpen}
-        onOpenChange={setIsWorkerDialogOpen}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setWorkerToEdit(null);
+          setIsWorkerDialogOpen(isOpen);
+        }}
         onSaveWorker={handleAddOrEditWorker}
         workerToEdit={workerToEdit}
       />

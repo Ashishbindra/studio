@@ -1,0 +1,52 @@
+[
+  {
+    "id": "p1",
+    "url": "https://picsum.photos/seed/1/100/100",
+    "hint": "male person"
+  },
+  {
+    "id": "p2",
+    "url": "https://picsum.photos/seed/2/100/100",
+    "hint": "female person"
+  },
+  {
+    "id": "p3",
+    "url": "https://picsum.photos/seed/3/100/100",
+    "hint": "man construction"
+  },
+  {
+    "id": "p4",
+    "url": "https://picsum.photos/seed/4/100/100",
+    "hint": "woman worker"
+  },
+  {
+    "id": "p5",
+    "url": "https://picsum.photos/seed/5/100/100",
+    "hint": "male worker"
+  },
+  {
+    "id": "p6",
+    "url": "https://picsum.photos/seed/6/100/100",
+    "hint": "female worker"
+  },
+  {
+    "id": "p7",
+    "url": "https://picsum.photos/seed/7/100/100",
+    "hint": "person portrait"
+  },
+  {
+    "id": "p8",
+    "url": "https://picsum.photos/seed/8/100/100",
+    "hint": "worker portrait"
+  },
+  {
+    "id": "p9",
+    "url": "https://picsum.photos/seed/9/100/100",
+    "hint": "man smiling"
+  },
+  {
+    "id": "p10",
+    "url": "https://picsum.photos/seed/10/100/100",
+    "hint": "woman smiling"
+  }
+]
