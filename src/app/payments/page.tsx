@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import PaymentHistoryTable from '@/components/payments/PaymentHistoryTable';
 import type { Worker, Payment } from '@/lib/types';
@@ -15,6 +15,7 @@ export default function PaymentsPage() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const isInitialMount = useRef(true);
   
   // Load data from localStorage on initial mount
   useEffect(() => {
@@ -33,15 +34,16 @@ export default function PaymentsPage() {
     }
   }, []);
 
-  // Save payments to localStorage whenever the payments state changes, but only if it's not the initial empty state.
+  // Save payments to localStorage whenever the payments state changes
   useEffect(() => {
-    // This check prevents overwriting stored data with an empty array on initial load
-    if (payments.length > 0) {
-      try {
-        localStorage.setItem('payments', JSON.stringify(payments));
-      } catch (error) {
-        console.error("Failed to save payments to localStorage", error);
-      }
+    if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+    }
+    try {
+      localStorage.setItem('payments', JSON.stringify(payments));
+    } catch (error) {
+      console.error("Failed to save payments to localStorage", error);
     }
   }, [payments]);
 
