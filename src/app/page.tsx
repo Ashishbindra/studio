@@ -1,6 +1,6 @@
 
 'use client';
-import { PlusCircle, Users, Wallet, Landmark, PiggyBank } from 'lucide-react';
+import { PlusCircle, Users, Wallet, Landmark, PiggyBank, Upload, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import WorkerList from '@/components/workers/WorkerList';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,6 +13,7 @@ import AdBanner from '@/components/AdBanner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import placeholderImages from '@/lib/placeholder-images.json';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 export default function DashboardPage() {
   const { t } = useLanguage();
@@ -24,6 +25,9 @@ export default function DashboardPage() {
   const [workerToDelete, setWorkerToDelete] = useState<Worker | null>(null);
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
   const isInitialMount = useRef(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isImportConfirmOpen, setIsImportConfirmOpen] = useState(false);
+  const [importFileData, setImportFileData] = useState<string | null>(null);
   
   // Load data from localStorage on initial mount
   useEffect(() => {
@@ -164,15 +168,99 @@ export default function DashboardPage() {
     }
   };
 
+  const handleExportData = () => {
+    try {
+      const allData = {
+        workers: JSON.parse(localStorage.getItem('workers') || '[]'),
+        allAttendance: JSON.parse(localStorage.getItem('allAttendance') || '{}'),
+        payments: JSON.parse(localStorage.getItem('payments') || '[]'),
+      };
+      const dataStr = JSON.stringify(allData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'shramik-hisab-backup.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: 'Data Exported', description: 'Your data has been downloaded successfully.' });
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({ title: 'Export Failed', description: 'Could not export your data.', variant: 'destructive' });
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result;
+        if (typeof content === 'string') {
+          setImportFileData(content);
+          setIsImportConfirmOpen(true);
+        }
+      };
+      reader.readAsText(file);
+    }
+    // Reset file input
+    if(event.target) event.target.value = '';
+  };
+  
+  const handleImportConfirm = () => {
+    if (importFileData) {
+      try {
+        const importedData = JSON.parse(importFileData);
+        if (importedData.workers && importedData.allAttendance && importedData.payments) {
+          localStorage.setItem('workers', JSON.stringify(importedData.workers));
+          localStorage.setItem('allAttendance', JSON.stringify(importedData.allAttendance));
+          localStorage.setItem('payments', JSON.stringify(importedData.payments));
+          toast({ title: 'Import Successful', description: 'Data has been restored. The page will now reload.' });
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          throw new Error('Invalid backup file structure.');
+        }
+      } catch (error) {
+        console.error('Import failed:', error);
+        toast({ title: 'Import Failed', description: 'The selected file is not a valid backup file.', variant: 'destructive' });
+      }
+    }
+    setIsImportConfirmOpen(false);
+    setImportFileData(null);
+  };
+
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h1 className="text-3xl font-bold font-headline">{t('dashboard.title')}</h1>
-        <Button onClick={handleOpenAddDialog} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-          <PlusCircle className="mr-2 h-5 w-5" />
-          {t('dashboard.add.worker')}
-        </Button>
+        <div className="flex gap-2">
+            <Button onClick={handleExportData} variant="outline">
+                <Download className="mr-2 h-5 w-5" />
+                Export Data
+            </Button>
+             <Button onClick={handleImportClick} variant="outline">
+                <Upload className="mr-2 h-5 w-5" />
+                Import Data
+            </Button>
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept=".json"
+                onChange={handleFileChange}
+            />
+            <Button onClick={handleOpenAddDialog} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                <PlusCircle className="mr-2 h-5 w-5" />
+                {t('dashboard.add.worker')}
+            </Button>
+        </div>
       </div>
 
        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
@@ -239,6 +327,25 @@ export default function DashboardPage() {
         onConfirm={handleDeleteConfirm}
         workerName={workerToDelete?.name || ''}
       />
+
+      <AlertDialog open={isImportConfirmOpen} onOpenChange={setIsImportConfirmOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This will permanently overwrite all your current data with the data from the backup file. This action cannot be undone.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setImportFileData(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleImportConfirm} className="bg-destructive hover:bg-destructive/90">
+                    Yes, import data
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
-}
+
+    
