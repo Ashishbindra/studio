@@ -1,6 +1,6 @@
 
 'use client';
-import { PlusCircle, Users, Wallet, Landmark, PiggyBank, Upload, Download } from 'lucide-react';
+import { PlusCircle, Users, Wallet, Landmark, PiggyBank, Upload, Download, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import WorkerList from '@/components/workers/WorkerList';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -26,8 +26,9 @@ export default function DashboardPage() {
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
   const isInitialMount = useRef(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isImportConfirmOpen, setIsImportConfirmOpen] = useState(false);
+  const [isImportConfirmOpen, setIsImportConfirmOpen] useState(false);
   const [importFileData, setImportFileData] = useState<string | null>(null);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   
   // Load data from localStorage on initial mount
   useEffect(() => {
@@ -234,13 +235,29 @@ export default function DashboardPage() {
     setIsImportConfirmOpen(false);
     setImportFileData(null);
   };
+  
+  const handleResetConfirm = () => {
+    try {
+      localStorage.removeItem('workers');
+      localStorage.removeItem('allAttendance');
+      localStorage.removeItem('payments');
+      localStorage.removeItem('language');
+      localStorage.removeItem('translations_hi');
+      toast({ title: 'Data Reset', description: 'All application data has been cleared. The page will now reload.' });
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (error) {
+      console.error('Data reset failed:', error);
+      toast({ title: 'Reset Failed', description: 'Could not reset application data.', variant: 'destructive' });
+    }
+    setIsResetConfirmOpen(false);
+  };
 
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h1 className="text-3xl font-bold font-headline">{t('dashboard.title')}</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
             <Button onClick={handleExportData} variant="outline">
                 <Download className="mr-2 h-5 w-5" />
                 Export Data
@@ -248,6 +265,10 @@ export default function DashboardPage() {
              <Button onClick={handleImportClick} variant="outline">
                 <Upload className="mr-2 h-5 w-5" />
                 Import Data
+            </Button>
+             <Button onClick={() => setIsResetConfirmOpen(true)} variant="destructive">
+                <Trash2 className="mr-2 h-5 w-5" />
+                Reset Data
             </Button>
             <input
                 type="file"
@@ -340,6 +361,23 @@ export default function DashboardPage() {
                 <AlertDialogCancel onClick={() => setImportFileData(null)}>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={handleImportConfirm} className="bg-destructive hover:bg-destructive/90">
                     Yes, import data
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isResetConfirmOpen} onOpenChange={setIsResetConfirmOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This will permanently delete all application data, including workers, attendance, and payments. This action cannot be undone.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleResetConfirm} className="bg-destructive hover:bg-destructive/90">
+                    Yes, reset data
                 </AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>

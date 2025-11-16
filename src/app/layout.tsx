@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
@@ -9,6 +10,7 @@ import Header from '@/components/layout/Header';
 export const metadata: Metadata = {
   title: 'Shramik Hisab',
   description: 'Manage daily attendance and payments of workers.',
+  icons: null,
 };
 
 export default function RootLayout({
