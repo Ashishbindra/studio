@@ -26,7 +26,7 @@ export default function DashboardPage() {
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
   const isInitialMount = useRef(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isImportConfirmOpen, setIsImportConfirmOpen] useState(false);
+  const [isImportConfirmOpen, setIsImportConfirmOpen] = useState(false);
   const [importFileData, setImportFileData] = useState<string | null>(null);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   
@@ -385,5 +385,8 @@ export default function DashboardPage() {
 
     </div>
   );
+
+    
+
 
     
